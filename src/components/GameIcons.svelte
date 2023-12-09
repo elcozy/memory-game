@@ -1,13 +1,22 @@
 <script lang="ts">
-    import { Application, Assets, Container, Graphics, Sprite } from "pixi.js";
+    import {
+        Application,
+        Assets,
+        Container,
+        Graphics,
+        Sprite,
+        Text,
+    } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
     import { svgIconsArr } from "../manifest";
     import {
         GameSize,
+        GameType,
         createGameRandomItems,
+        setDimensions,
         shuffleArray,
     } from "../constants";
-    import { tempMoves } from "../store";
+    import { gameStore, updateGameStore } from "../store";
 
     export let app: Application;
 
@@ -15,19 +24,42 @@
     let bunnyRotate;
     let gridContainer;
     let isDragging = false;
+    let newGameElements = [];
 
     let icons;
 
-    onMount(() => {
-        // setup();
-
+    const createGame = () => {
         console.log("hi mounted");
 
         icons = shuffleArray(svgIconsArr);
-        createGrid(GameSize.Four, app.renderer.width - 100);
+        createGrid(
+            $gameStore.gridSize,
+            app.renderer.width,
+            $gameStore.gridType
+        );
+    };
+    onMount(() => {
+        // setup();
+        createGame();
     });
 
     afterUpdate(() => {});
+
+    const unsubGameStore = gameStore.subscribe((currStore) => {
+        if (currStore.gameElements.length === 0) {
+            newGameElements = newGameElements.map((row) => {
+                if (row?.length) {
+                    row.filter((cols) => {
+                        cols.circle?.destroy();
+                        cols.innerElement?.destroy();
+                        return false;
+                    });
+                }
+            });
+
+            createGame();
+        }
+    });
 
     onDestroy(() => {
         if (app) {
@@ -36,9 +68,16 @@
 
             if (gridContainer) app.stage?.removeChild(gridContainer);
         }
+        unsubGameStore();
     });
 
-    function createGrid(rows: GameSize, containerWidth, columns = rows) {
+    function createGrid(
+        rows: GameSize,
+        containerWidth,
+        iconGrid: GameType,
+        columns = rows
+    ) {
+        newGameElements = [];
         const gap = 10;
         let circleDiameter = containerWidth / rows - gap - gap / rows;
         let circleRadius = circleDiameter / 2;
@@ -47,14 +86,24 @@
 
         const gameElements = createGameRandomItems(gridSize);
 
-        console.log(containerWidth, circleRadius);
+        console.log(
+            containerWidth,
+            "circleRadius",
+            circleRadius,
+            circleRadius / 1.7
+        );
         gridContainer = new Container();
 
+        gridContainer.position.set(0, 67 + 15);
+
         let currentCircle = 0;
+
         for (let i = 0; i < rows; i++) {
+            const rowsArr = [];
             for (let j = 0; j < columns; j++) {
                 const circle = new Graphics();
-                const elementColor = gameElements[currentCircle].iconColor;
+                const currGameElement = gameElements[currentCircle];
+                const elementColor = currGameElement.iconColor;
 
                 circle.beginFill(elementColor);
                 // circle.beginFill(0xffffc9);
@@ -70,28 +119,39 @@
                 circle.interactive = true;
                 circle.cursor = "pointer";
                 // console.log("currentCircle", currentCircle);
+                let circleShape;
+                let circleNumber;
 
-                const icon = Sprite.from(
-                    Assets.get(icons[gameElements[currentCircle].value])
-                );
-                // icon.width = 30;
-                // icon.height = 30;
+                let element;
+                if (iconGrid) {
+                    circleShape = Sprite.from(
+                        Assets.get(icons[currGameElement.value])
+                    );
+                    element = circleShape;
+                    // icon.width = 30;
+                    // icon.height = 30;
 
-                const desiredHeight = 40;
-                icon.height = desiredHeight;
+                    setDimensions(null, circleRadius / 1.7, circleShape);
 
-                // Calculate the corresponding width to maintain aspect ratio
-                const aspectRatio =
-                    icon.texture.orig.width / icon.texture.orig.height;
-                icon.width = icon.height * aspectRatio;
+                    circleShape.anchor.set(0.5);
+                    circleShape.position.set(x, y);
+                    // icon.tint = 0xfff000;
 
-                icon.anchor.set(0.5);
-                icon.position.set(x, y);
-                // icon.tint = 0xfff000;
+                    // Apply the filter to the sprite
 
-                // Apply the filter to the sprite
+                    // icon.tint = elementColor;
+                } else {
+                    circleNumber = new Text(currGameElement.value, {
+                        fontWeight: "bolder",
+                        fontSize: 40,
+                        fill: 0xffffff,
+                    });
+                    element = circleNumber;
 
-                // icon.tint = elementColor;
+                    circleNumber.anchor.set(0.5);
+
+                    circleNumber.position.set(x, y);
+                }
 
                 const setOpenState = (isOpen = true) => {
                     circle.clear();
@@ -101,13 +161,13 @@
                     circle.endFill();
                 };
                 const setHoverState = (isOver = true) => {
-                    if (icon.visible) return;
+                    if (element.visible) return;
 
                     circle.clear();
                     circle.beginFill(
                         isOver
                             ? 0x6395b8
-                            : icon.visible
+                            : element.visible
                               ? elementColor
                               : //   ? 0xfda214
                                 0x304859
@@ -116,7 +176,10 @@
                     circle.endFill();
                 };
 
-                // icon.visible = false;
+                // element.visible = false;
+                // setOpenState(element.visible);
+
+                currGameElement.isVisible = element.visible;
                 circle.on("mousedown", () => {
                     console.log(
                         "clicked on:",
@@ -125,9 +188,14 @@
                         "currentCircle:",
                         currentCircle
                     );
-                    tempMoves.update((prev) => prev + 1);
-                    icon.visible = !icon.visible;
-                    setOpenState(icon.visible);
+
+                    updateGameStore((state) => {
+                        state.movesTotal += 1;
+                        state.gameElements[i][j].isVisible = !element.visible;
+                        return state;
+                    });
+                    element.visible = !element.visible;
+                    setOpenState(element.visible);
                 });
 
                 circle.on("pointerover", () => {
@@ -139,9 +207,29 @@
                 });
 
                 currentCircle++;
-                gridContainer.addChild(circle, icon);
+                gridContainer.addChild(circle);
+                if (iconGrid) {
+                    gridContainer.addChild(circleShape);
+                } else {
+                    gridContainer.addChild(circleNumber);
+                }
+
+                const newObj = {
+                    position: { row: i, column: j },
+                    value: null,
+                    circle,
+                    innerElement: element,
+                    ...currGameElement,
+                };
+                rowsArr.push(newObj);
             }
+            newGameElements.push(rowsArr);
         }
+        console.log(newGameElements);
+        updateGameStore((state) => {
+            state.gameElements = newGameElements;
+            return state;
+        });
         app.stage.addChild(gridContainer);
     }
 </script>
