@@ -23,8 +23,8 @@
 
         await Assets.init({ manifest }).then(async () => {
             await Assets.loadBundle("svgs");
+            appLoaded = true;
         });
-        appLoaded = true;
     });
 
     afterUpdate(() => {
