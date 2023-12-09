@@ -1,23 +1,29 @@
 <script lang="ts">
-    import { Application } from "pixi.js";
+    import { Application, Assets } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
     import { welcomeMessage } from "./store";
     import Bunny from "./components/Bunny.svelte";
+    import { manifest } from "./manifest";
+    import GameIcons from "./components/GameIcons.svelte";
+
     let pixiContainer;
 
     let app: Application;
     let appLoaded;
 
-    onMount(() => {
+    onMount(async () => {
         app = new Application({
-            width: 300,
-            height: 300,
+            width: 500,
+            height: 500,
             backgroundColor: 0xcdf005,
         });
 
-        app.stage.interactiveChildren = false;
+        app.stage.interactiveChildren = true;
         app.stage.sortableChildren = true;
 
+        await Assets.init({ manifest }).then(async () => {
+            await Assets.loadBundle("svgs");
+        });
         appLoaded = true;
     });
 
@@ -39,6 +45,7 @@
     <section class="pixi-container" bind:this={pixiContainer} />
 
     {#if appLoaded}
-        <Bunny {app} />
+        <!-- <Bunny {app} /> -->
+        <GameIcons {app} />
     {/if}
 </section>

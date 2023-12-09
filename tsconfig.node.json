@@ -5,5 +5,5 @@
         "skipLibCheck": true,
         "moduleResolution": "bundler"
     },
-    "include": ["config/vite.config.ts"]
+    "include": ["vite.config.ts"]
 }
