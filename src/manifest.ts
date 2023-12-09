@@ -16,6 +16,7 @@ import Hamburger from "./assets/gameIcons/Hamburger.svg";
 import Lemon from "./assets/gameIcons/Lemon.svg";
 import Meteor from "./assets/gameIcons/Meteor.svg";
 import Sun from "./assets/gameIcons/Sun.svg";
+import Title from "./assets/Title.svg";
 
 const svgIcons = [
     Atom,
@@ -61,6 +62,10 @@ export const manifest = {
                 {
                     alias: "bunny",
                     src: "https://pixijs.com/assets/bunny.png",
+                },
+                {
+                    alias: "Title",
+                    src: Title,
                 },
             ],
         },
