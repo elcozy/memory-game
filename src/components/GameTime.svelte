@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Application, Container, Graphics, Text } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
-    import { tempTime } from "../store";
+    import { gameStore, updateGameStore } from "../store";
 
     export let app: Application;
 
@@ -37,7 +37,10 @@
                     ? `${minutes}:0${remainingSeconds}`
                     : `${minutes}:${remainingSeconds}`;
 
-            tempTime.set(formattedTime);
+            updateGameStore((state) => {
+                state.timeElapsed = formattedTime;
+                return state;
+            });
         }, 1000);
     };
 
@@ -45,20 +48,31 @@
         startTimer();
     });
 
-    onDestroy(() => {
-        clearInterval(interval);
-    });
+    let lastTimeElapsed = null;
 
-    tempTime.subscribe((currTime) => {
-        if (timeSpentPixi) {
-            timeSpentPixi.text = currTime;
-            timeSpentPixi.position.set(
-                timeBg.width - padding - timeSpentPixi.width,
-                timeBg.height / 2 - timeSpentPixi.height / 2
-            );
+    const unsubGameStore = gameStore.subscribe((currStore) => {
+        if (seconds && currStore.timeElapsed === "0:00") {
+            seconds = 0;
+            clearInterval(interval);
+            startTimer();
+        }
+        if (currStore.timeElapsed !== lastTimeElapsed) {
+            lastTimeElapsed = currStore.timeElapsed;
+
+            if (timeSpentPixi) {
+                timeSpentPixi.text = lastTimeElapsed;
+                timeSpentPixi.position.set(
+                    timeBg.width - padding - timeSpentPixi.width,
+                    timeBg.height / 2 - timeSpentPixi.height / 2
+                );
+            }
         }
     });
 
+    onDestroy(() => {
+        clearInterval(interval);
+        unsubGameStore();
+    });
     function createTime() {
         movesContainer = new Container();
 
@@ -71,10 +85,10 @@
         timeBg.drawRoundedRect(0, 0, timeBgWidth, timeBgHeight, padding);
         timeBg.endFill();
 
-        const x = 4;
-        const y = app.renderer.height - timeBg.height;
+        const x = 0;
+        const y = app.renderer.height - timeBgHeight;
 
-        movesContainer.position.set(x, y);
+        movesContainer.position.set(x + 10, y - 10);
 
         timeBg.interactive = true;
         timeBg.cursor = "pointer";
@@ -83,7 +97,7 @@
             fontSize: 18,
         });
 
-        timeSpentPixi = new Text($tempTime, {
+        timeSpentPixi = new Text($gameStore.timeElapsed, {
             fontSize: 24,
             fontWeight: "bolder",
         });
