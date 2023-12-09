@@ -33,56 +33,7 @@
         }
     });
 
-    function setup() {
-        const stage = app.stage;
-        const items = [...svgIconsArr, "bunny"];
-        bunny = Sprite.from(
-            Assets.get(items[Math.floor(Math.random() * items.length)])
-        );
-
-        // bunny = Sprite.from("https://pixijs.com/assets/bunny.png");
-
-        bunny.position.set(0, 0);
-        bunny.anchor.set(0);
-
-        stage.addChild(bunny);
-
-        const appWidth = app.renderer.width;
-        const appHeight = app.renderer.height;
-        bunnyRotate = (delta) => {
-            if (isDragging) {
-                return;
-            }
-            // bunny.rotation += 0.1 * delta;
-            if (bunny.y < 1 && bunny.x <= appWidth - bunny.width - 1) {
-                bunny.x += 2 * delta;
-            } else if (
-                bunny.x >= appWidth - bunny.x &&
-                bunny.y <= appHeight - bunny.height - 2
-            ) {
-                bunny.y += 2 * delta;
-            } else if (bunny.y >= appHeight - bunny.height - 2 && bunny.x > 1) {
-                bunny.x -= 2 * delta;
-            } else if (bunny.y >= 1 && bunny.x <= 2) {
-                bunny.y -= 2 * delta;
-            }
-        };
-        app.view.style.cursor = "pointer";
-
-        app.view.addEventListener("mousedown", () => {
-            isDragging = true;
-            app.ticker.stop();
-        });
-
-        app.view.addEventListener("mouseup", () => {
-            isDragging = false;
-            app.ticker.start();
-        });
-
-        app.ticker.add(bunnyRotate);
-    }
-
-    const generateGameElements = (state) => {
+    const createGameRandomItems = (state) => {
         const gridDifferentElements = state.gridSize / 2;
         const newGameElements = [];
         const row = Math.sqrt(state.gridSize);
@@ -121,7 +72,7 @@
 
         const gridSize = Math.pow(rows, 2);
 
-        const gameElements = generateGameElements({
+        const gameElements = createGameRandomItems({
             gridSize: gridSize,
         });
 
@@ -132,7 +83,10 @@
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < columns; j++) {
                 const circle = new Graphics();
-                circle.beginFill(0xffffc9);
+                const elementColor = gameElements[currentCircle].iconColor;
+
+                circle.beginFill(elementColor);
+                // circle.beginFill(0xffffc9);
                 // circle.beginFill(0x304859);
                 circle.drawCircle(0, 0, circleRadius);
                 circle.endFill();
@@ -165,7 +119,31 @@
                 // icon.tint = 0xfff000;
 
                 // Apply the filter to the sprite
-                icon.tint = gameElements[currentCircle].iconColor;
+
+                // icon.tint = elementColor;
+
+                const setOpenState = (isOpen = true) => {
+                    circle.clear();
+                    circle.beginFill(isOpen ? elementColor : 0x304859);
+                    // circle.beginFill(isOpen ? 0xfda214 : 0x304859);
+                    circle.drawCircle(0, 0, circleRadius);
+                    circle.endFill();
+                };
+                const setHoverState = (isOver = true) => {
+                    if (icon.visible) return;
+
+                    circle.clear();
+                    circle.beginFill(
+                        isOver
+                            ? 0x6395b8
+                            : icon.visible
+                              ? elementColor
+                              : //   ? 0xfda214
+                                0x304859
+                    );
+                    circle.drawCircle(0, 0, circleRadius);
+                    circle.endFill();
+                };
 
                 // icon.visible = false;
                 circle.on("mousedown", () => {
@@ -177,7 +155,17 @@
                         currentCircle
                     );
                     icon.visible = !icon.visible;
+                    setOpenState(icon.visible);
                 });
+
+                circle.on("pointerover", () => {
+                    setHoverState(true);
+                });
+
+                circle.on("pointerout", () => {
+                    setHoverState(false);
+                });
+
                 currentCircle++;
                 gridContainer.addChild(circle, icon);
             }
