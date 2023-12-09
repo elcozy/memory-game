@@ -5,6 +5,8 @@
     import Bunny from "./components/Bunny.svelte";
     import { manifest } from "./manifest";
     import GameIcons from "./components/GameIcons.svelte";
+    import GameMoves from "./components/GameMoves.svelte";
+    import GameTime from "./components/GameTime.svelte";
 
     let pixiContainer;
 
@@ -13,8 +15,8 @@
 
     onMount(async () => {
         app = new Application({
-            width: 500,
-            height: 500,
+            width: 700,
+            height: 700,
             backgroundColor: 0xcdf005,
         });
 
@@ -47,5 +49,7 @@
     {#if appLoaded}
         <!-- <Bunny {app} /> -->
         <GameIcons {app} />
+        <GameMoves {app} />
+        <GameTime {app} />
     {/if}
 </section>

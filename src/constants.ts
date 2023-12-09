@@ -17,3 +17,35 @@ export function shuffleArray(array) {
     }
     return newArray;
 }
+
+export const createGameRandomItems = (gridSize) => {
+    const gridDifferentElements = gridSize / 2;
+    const newGameElements = [];
+    // const row = Math.sqrt(gridSize);
+
+    let color;
+    for (let i = 0; i < gridDifferentElements; i++) {
+        let randomPosition = 0;
+        let countInserted = 0;
+        if (countInserted === 0) {
+            color = Math.random() * 0xffffff;
+        }
+        do {
+            randomPosition = Math.floor(Math.random() * gridSize);
+            if (newGameElements[randomPosition] === undefined) {
+                newGameElements[randomPosition] = {
+                    value: i + 1,
+                    isVisible: false,
+                    isActive: false,
+                    iconColor: color,
+                };
+
+                countInserted++;
+            }
+        } while (countInserted < 2);
+
+        countInserted = 0;
+    }
+    console.log(newGameElements);
+    return newGameElements;
+};

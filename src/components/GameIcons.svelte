@@ -2,7 +2,12 @@
     import { Application, Assets, Container, Graphics, Sprite } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
     import { svgIconsArr } from "../manifest";
-    import { GameSize, shuffleArray } from "../constants";
+    import {
+        GameSize,
+        createGameRandomItems,
+        shuffleArray,
+    } from "../constants";
+    import { tempMoves } from "../store";
 
     export let app: Application;
 
@@ -19,7 +24,7 @@
         console.log("hi mounted");
 
         icons = shuffleArray(svgIconsArr);
-        createGrid(GameSize.Four, app.renderer.width);
+        createGrid(GameSize.Four, app.renderer.width - 100);
     });
 
     afterUpdate(() => {});
@@ -33,38 +38,6 @@
         }
     });
 
-    const createGameRandomItems = (state) => {
-        const gridDifferentElements = state.gridSize / 2;
-        const newGameElements = [];
-        const row = Math.sqrt(state.gridSize);
-
-        let color;
-        for (let i = 0; i < gridDifferentElements; i++) {
-            let randomPosition = 0;
-            let countInserted = 0;
-            if (countInserted === 0) {
-                color = Math.random() * 0xffffff;
-            }
-            do {
-                randomPosition = Math.floor(Math.random() * state.gridSize);
-                if (newGameElements[randomPosition] === undefined) {
-                    newGameElements[randomPosition] = {
-                        value: i + 1,
-                        isVisible: false,
-                        isActive: false,
-                        iconColor: color,
-                    };
-
-                    countInserted++;
-                }
-            } while (countInserted < 2);
-
-            countInserted = 0;
-        }
-        console.log(newGameElements);
-        return newGameElements;
-    };
-
     function createGrid(rows: GameSize, containerWidth, columns = rows) {
         const gap = 10;
         let circleDiameter = containerWidth / rows - gap - gap / rows;
@@ -72,9 +45,7 @@
 
         const gridSize = Math.pow(rows, 2);
 
-        const gameElements = createGameRandomItems({
-            gridSize: gridSize,
-        });
+        const gameElements = createGameRandomItems(gridSize);
 
         console.log(containerWidth, circleRadius);
         gridContainer = new Container();
@@ -154,6 +125,7 @@
                         "currentCircle:",
                         currentCircle
                     );
+                    tempMoves.update((prev) => prev + 1);
                     icon.visible = !icon.visible;
                     setOpenState(icon.visible);
                 });
