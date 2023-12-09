@@ -1,12 +1,13 @@
 <script lang="ts">
     import { Application, Assets } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
-    import { welcomeMessage } from "./store";
+    import { gameStore, welcomeMessage } from "./store";
     import Bunny from "./components/Bunny.svelte";
     import { manifest } from "./manifest";
     import GameIcons from "./components/GameIcons.svelte";
     import GameMoves from "./components/GameMoves.svelte";
     import GameTime from "./components/GameTime.svelte";
+    import Header from "./components/Header.svelte";
 
     let pixiContainer;
 
@@ -15,8 +16,8 @@
 
     onMount(async () => {
         app = new Application({
-            width: 700,
-            height: 700,
+            width: 600,
+            height: 800,
             backgroundColor: 0xcdf005,
         });
 
@@ -36,8 +37,13 @@
         welcomeMessage.set("Hello Pixi -x- Svelte");
     });
 
+    const unsubGameStore = gameStore.subscribe((currGameStore) => {
+        // console.log("currGameStore", currGameStore);
+    });
+
     onDestroy(() => {
         app.destroy(true, { children: true });
+        unsubGameStore();
     });
 </script>
 
@@ -48,6 +54,7 @@
 
     {#if appLoaded}
         <!-- <Bunny {app} /> -->
+        <Header {app} />
         <GameIcons {app} />
         <GameMoves {app} />
         <GameTime {app} />

@@ -1,13 +1,60 @@
+import { get } from "svelte/store";
+import { gameStore, updateGameStore } from "./store";
+
 export const maxPlayers = 4;
 export enum GameType {
-    svgIconsArr,
     Numbers,
+    SvgIconsArr,
 }
 
 export enum GameSize {
     Four = 4,
     Six = 6,
 }
+
+export type TGameStore = {
+    timeSpent: number;
+    movesTotal: number;
+    timeElapsed: string;
+    gridType: GameType;
+    gridSize: GameSize;
+
+    gameElements: any[];
+    minutesElapsed: 0;
+    secondsElapsed: 0;
+    moves: any[];
+    pairs: any[];
+    lastTwoMoves: any[];
+    gameStarted: number;
+    numOfPlayers: number;
+    activePlayerIndex: number;
+    isGameFinished: boolean;
+};
+type gameElement = {
+    value: number;
+    isVisible: boolean;
+    isActive: boolean;
+    iconColor: number;
+};
+
+export const initStore: TGameStore = {
+    timeSpent: 0,
+    movesTotal: 0,
+    timeElapsed: "0:00",
+    gridType: GameType.SvgIconsArr,
+    gridSize: GameSize.Four,
+
+    gameElements: [],
+    minutesElapsed: 0,
+    secondsElapsed: 0,
+    moves: [],
+    pairs: [],
+    lastTwoMoves: [],
+    gameStarted: 0,
+    numOfPlayers: 1,
+    activePlayerIndex: 0,
+    isGameFinished: false,
+};
 
 export function shuffleArray(array) {
     const newArray = [...array];
@@ -17,10 +64,57 @@ export function shuffleArray(array) {
     }
     return newArray;
 }
+interface Dimensions {
+    width: number;
+    height: number;
+}
 
+export function calculateDimensions(
+    desiredWidth: number | null,
+    desiredHeight: number | null,
+    sprite: { texture: { orig: { width: number; height: number } } }
+): Dimensions {
+    const dimensions: Dimensions = { width: 0, height: 0 };
+
+    if (desiredWidth) {
+        // Calculate height based on desired width
+        dimensions.width = desiredWidth;
+        dimensions.height =
+            dimensions.width /
+            (sprite.texture.orig.width / sprite.texture.orig.height);
+    } else if (desiredHeight) {
+        // Calculate width based on desired height
+        dimensions.height = desiredHeight;
+        dimensions.width =
+            dimensions.height *
+            (sprite.texture.orig.width / sprite.texture.orig.height);
+    } else {
+        // If neither width nor height is provided, return original dimensions
+        dimensions.width = sprite.texture.orig.width;
+        dimensions.height = sprite.texture.orig.height;
+    }
+
+    return dimensions;
+}
+
+export function setDimensions(
+    desiredWidth: number | null,
+    desiredHeight: number | null,
+    sprite: {
+        texture: { orig: { width: number; height: number } };
+        height: number;
+        width: number;
+    }
+) {
+    const imgSize = calculateDimensions(desiredWidth, desiredHeight, sprite);
+
+    sprite.height = imgSize.height;
+    sprite.width = imgSize.width;
+}
 export const createGameRandomItems = (gridSize) => {
     const gridDifferentElements = gridSize / 2;
     const newGameElements = [];
+    const newGameElements2 = [];
     // const row = Math.sqrt(gridSize);
 
     let color;
@@ -28,7 +122,7 @@ export const createGameRandomItems = (gridSize) => {
         let randomPosition = 0;
         let countInserted = 0;
         if (countInserted === 0) {
-            color = Math.random() * 0xffffff;
+            color = Number((Math.random() * 0xffffff).toFixed(2));
         }
         do {
             randomPosition = Math.floor(Math.random() * gridSize);
@@ -48,4 +142,8 @@ export const createGameRandomItems = (gridSize) => {
     }
     console.log(newGameElements);
     return newGameElements;
+};
+
+export const restartGame = () => {
+    gameStore.set({ ...initStore });
 };
