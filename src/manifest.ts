@@ -28,14 +28,14 @@ const svgIcons = [
     Car,
     Cloud,
     CodeBranch,
-    // Coffee,
-    // DiceFive,
-    // Dragon,
-    // Fire,
-    // Hamburger,
-    // Lemon,
-    // Meteor,
-    // Sun,
+    Coffee,
+    DiceFive,
+    Dragon,
+    Fire,
+    Hamburger,
+    Lemon,
+    Meteor,
+    Sun,
 ];
 
 const arrayOfObjects = svgIcons.map((src) => ({
