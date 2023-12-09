@@ -2,9 +2,11 @@
     import { Application, Container, Graphics, Text } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
     import { GameSize } from "../constants";
-    import { tempMoves } from "../store";
+    import { gameStore, updateGameStore } from "../store";
 
     export let app: Application;
+    const padding = 15;
+    let movesBg;
 
     let movesContainer;
     let movesPixi;
@@ -14,58 +16,67 @@
 
     afterUpdate(() => {});
 
+    let lastMoves = null;
+
+    const unsubGameStore = gameStore.subscribe((currStore) => {
+        if (currStore.movesTotal !== lastMoves) {
+            console.log("X game", currStore);
+            lastMoves = currStore.movesTotal;
+
+            if (movesPixi) {
+                movesPixi.text = currStore.movesTotal;
+                movesPixi.position.set(
+                    movesBg.width - padding - movesPixi.width,
+                    movesBg.height / 2 - movesPixi.height / 2
+                );
+            }
+        }
+    });
+
     onDestroy(() => {
         if (app) {
             if (movesContainer) app.stage?.removeChild(movesContainer);
         }
+        unsubGameStore();
     });
-
-    tempMoves.subscribe((currMoves) => {
-        if (movesPixi) {
-            movesPixi.text = currMoves;
-        }
-    });
-
     function createMoves() {
         movesContainer = new Container();
 
-        const padding = 15;
+        const movesBgWidth = 250;
+        const movesBgHeight = 67;
 
-        const timeBgWidth = 250;
-        const timeBgHeight = 67;
+        movesBg = new Graphics();
 
-        const timeBg = new Graphics();
+        movesBg.beginFill(0xdfe7ec);
+        movesBg.drawRoundedRect(0, 0, movesBgWidth, movesBgHeight, padding);
+        movesBg.endFill();
 
-        timeBg.beginFill(0xdfe7ec);
-        timeBg.drawRoundedRect(0, 0, timeBgWidth, timeBgHeight, padding);
-        timeBg.endFill();
+        const x = app.renderer.width - movesBgWidth;
+        const y = app.renderer.height - movesBgHeight;
 
-        const x = 4 + 300;
-        const y = app.renderer.height - timeBg.height;
+        movesContainer.position.set(x - 10, y - 10);
 
-        movesContainer.position.set(x, y);
-
-        timeBg.interactive = true;
-        timeBg.cursor = "pointer";
+        movesBg.interactive = true;
+        movesBg.cursor = "pointer";
 
         const movesTextPixi = new Text("Moves", {
             fontSize: 18,
         });
-        movesPixi = new Text($tempMoves, {
+        movesPixi = new Text($gameStore.movesTotal, {
             fontSize: 24,
             fontWeight: "bolder",
         });
 
         movesTextPixi.position.set(
             padding,
-            timeBg.height / 2 - movesTextPixi.height / 2
+            movesBg.height / 2 - movesTextPixi.height / 2
         );
         movesPixi.position.set(
-            timeBg.width - padding - movesPixi.width,
-            timeBg.height / 2 - movesPixi.height / 2
+            movesBg.width - padding - movesPixi.width,
+            movesBg.height / 2 - movesPixi.height / 2
         );
 
-        movesContainer.addChild(timeBg, movesTextPixi, movesPixi);
+        movesContainer.addChild(movesBg, movesTextPixi, movesPixi);
 
         app.stage.addChild(movesContainer);
     }
