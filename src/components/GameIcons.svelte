@@ -87,10 +87,13 @@
         const newGameElements = [];
         const row = Math.sqrt(state.gridSize);
 
+        let color;
         for (let i = 0; i < gridDifferentElements; i++) {
             let randomPosition = 0;
             let countInserted = 0;
-
+            if (countInserted === 0) {
+                color = Math.random() * 0xffffff;
+            }
             do {
                 randomPosition = Math.floor(Math.random() * state.gridSize);
                 if (newGameElements[randomPosition] === undefined) {
@@ -98,6 +101,7 @@
                         value: i + 1,
                         isVisible: false,
                         isActive: false,
+                        iconColor: color,
                     };
 
                     countInserted++;
@@ -128,7 +132,8 @@
         for (let i = 0; i < rows; i++) {
             for (let j = 0; j < columns; j++) {
                 const circle = new Graphics();
-                circle.beginFill(0x304859);
+                circle.beginFill(0xffffc9);
+                // circle.beginFill(0x304859);
                 circle.drawCircle(0, 0, circleRadius);
                 circle.endFill();
 
@@ -144,18 +149,33 @@
                 const icon = Sprite.from(
                     Assets.get(icons[gameElements[currentCircle].value])
                 );
-                icon.width = 30;
-                icon.height = 30;
+                // icon.width = 30;
+                // icon.height = 30;
+
+                const desiredHeight = 40;
+                icon.height = desiredHeight;
+
+                // Calculate the corresponding width to maintain aspect ratio
+                const aspectRatio =
+                    icon.texture.orig.width / icon.texture.orig.height;
+                icon.width = icon.height * aspectRatio;
+
                 icon.anchor.set(0.5);
                 icon.position.set(x, y);
                 // icon.tint = 0xfff000;
 
                 // Apply the filter to the sprite
-                // icon.tint = Math.random() * 0xffffff;
+                icon.tint = gameElements[currentCircle].iconColor;
 
                 // icon.visible = false;
                 circle.on("mousedown", () => {
-                    console.log("clicked on:", i, j);
+                    console.log(
+                        "clicked on:",
+                        i,
+                        j,
+                        "currentCircle:",
+                        currentCircle
+                    );
                     icon.visible = !icon.visible;
                 });
                 currentCircle++;
