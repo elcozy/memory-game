@@ -147,3 +147,9 @@ export const createGameRandomItems = (gridSize) => {
 export const restartGame = () => {
     gameStore.set({ ...initStore });
 };
+export const centerItem = (element, parent) => {
+    element.position.set(
+        parent.x + parent.width / 2 - element.width / 2,
+        parent.y + parent.height / 2 - element.height / 2
+    );
+};

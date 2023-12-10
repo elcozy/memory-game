@@ -59,10 +59,10 @@ export const manifest = {
             name: "svgs",
             assets: [
                 ...arrayOfObjects,
-                {
-                    alias: "bunny",
-                    src: "https://pixijs.com/assets/bunny.png",
-                },
+                // {
+                //     alias: "bunny",
+                //     src: "https://pixijs.com/assets/bunny.png",
+                // },
                 {
                     alias: "Title",
                     src: Title,

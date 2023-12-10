@@ -24,7 +24,8 @@
 
     function setup() {
         const stage = app.stage;
-        const items = [...svgIconsArr, "bunny"];
+        const items = [...svgIconsArr];
+        // const items = [...svgIconsArr, "bunny"];
         bunny = Sprite.from(
             Assets.get(items[Math.floor(Math.random() * items.length)])
         );
