@@ -8,7 +8,7 @@
         Text,
     } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
-    import { gameStore, updateGameStore } from "../store";
+    import { updateGameStore } from "../store";
     import { restartGame, setDimensions } from "../constants";
 
     export let app: Application;
@@ -57,6 +57,10 @@
         newGameBg.cursor = "pointer";
         newGameBg.on("mousedown", () => {
             console.log("New Game");
+            updateGameStore((state) => {
+                state.screen = "main";
+                return state;
+            });
         });
 
         const tileIcon = Sprite.from(Assets.get("Title"));

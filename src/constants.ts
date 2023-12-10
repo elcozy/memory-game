@@ -11,6 +11,12 @@ export enum GameSize {
     Four = 4,
     Six = 6,
 }
+export enum EPlayerNum {
+    One,
+    Two,
+    Three,
+    Four,
+}
 
 export type TGameStore = {
     timeSpent: number;
@@ -18,10 +24,10 @@ export type TGameStore = {
     timeElapsed: string;
     gridType: GameType;
     gridSize: GameSize;
-
+    screen: "game" | "main";
     gameElements: any[];
-    minutesElapsed: 0;
-    secondsElapsed: 0;
+    playerNum: EPlayerNum;
+
     moves: any[];
     pairs: any[];
     lastTwoMoves: any[];
@@ -45,8 +51,9 @@ export const initStore: TGameStore = {
     gridSize: GameSize.Four,
 
     gameElements: [],
-    minutesElapsed: 0,
-    secondsElapsed: 0,
+    screen: "main",
+    playerNum: EPlayerNum.One,
+
     moves: [],
     pairs: [],
     lastTwoMoves: [],
@@ -114,8 +121,6 @@ export function setDimensions(
 export const createGameRandomItems = (gridSize) => {
     const gridDifferentElements = gridSize / 2;
     const newGameElements = [];
-    const newGameElements2 = [];
-    // const row = Math.sqrt(gridSize);
 
     let color;
     for (let i = 0; i < gridDifferentElements; i++) {
@@ -145,7 +150,16 @@ export const createGameRandomItems = (gridSize) => {
 };
 
 export const restartGame = () => {
-    gameStore.set({ ...initStore });
+    // gameStore.set({ ...initStore, screen: "game" });
+    // gameStore.set({ ...initStore,gameElements:get(gameStore) screen: "game" });
+
+    gameStore.update((prev) => {
+        return {
+            ...initStore,
+            // gameElements: prev.gameElements,
+            screen: "game",
+        };
+    });
 };
 export const centerItem = (element, parent) => {
     element.position.set(

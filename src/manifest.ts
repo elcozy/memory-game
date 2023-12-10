@@ -37,6 +37,7 @@ const svgIcons = [
     Lemon,
     Meteor,
     Sun,
+    Sun,
 ];
 
 const arrayOfObjects = svgIcons.map((src) => ({

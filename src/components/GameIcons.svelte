@@ -20,10 +20,7 @@
 
     export let app: Application;
 
-    let bunny;
-    let bunnyRotate;
     let gridContainer;
-    let isDragging = false;
     let newGameElements = [];
 
     let icons;
@@ -39,36 +36,54 @@
         );
     };
     onMount(() => {
-        // setup();
         createGame();
     });
 
-    afterUpdate(() => {});
+    async function destroyElements() {
+        console.log("start destroying");
 
-    const unsubGameStore = gameStore.subscribe((currStore) => {
-        if (currStore.gameElements.length === 0) {
-            newGameElements = newGameElements.map((row) => {
+        await new Promise((res) => {
+            newGameElements = newGameElements.map((row, i) => {
                 if (row?.length) {
                     row.filter((cols) => {
                         cols.circle?.destroy();
                         cols.innerElement?.destroy();
                         return false;
                     });
+                    if (i === $gameStore.gridSize - 1) {
+                        res("done");
+                        console.log("done destroying");
+                    }
                 }
             });
 
+            newGameElements = newGameElements.filter((row) => {
+                if (!row) return false;
+            });
+        });
+    }
+    let creatingGrid = false;
+
+    const unsubGameStore = gameStore.subscribe(async (currStore) => {
+        // if (currStore.timeElapsed === "0:00") {
+
+        if (currStore.gameElements.length === 0 && !creatingGrid) {
+            await destroyElements();
+            console.log("destroyed grid on subscribe");
             createGame();
+            // destroyElements();
+            // await destroyElements();
+        } else {
+            // createGame();
         }
     });
 
-    onDestroy(() => {
+    onDestroy(async () => {
+        await destroyElements();
+        unsubGameStore();
         if (app) {
-            if (bunnyRotate) app?.ticker?.remove(bunnyRotate);
-            if (bunny) app.stage?.removeChild(bunny);
-
             if (gridContainer) app.stage?.removeChild(gridContainer);
         }
-        unsubGameStore();
     });
 
     function createGrid(
@@ -77,13 +92,17 @@
         iconGrid: GameType,
         columns = rows
     ) {
-        newGameElements = [];
+        creatingGrid = true;
         const gap = 10;
         let circleDiameter = containerWidth / rows - gap - gap / rows;
         let circleRadius = circleDiameter / 2;
 
         const gridSize = Math.pow(rows, 2);
-
+        console.log("gridSize", gridSize, icons.length);
+        if (gridSize / 2 >= icons.length) {
+            console.error("Grid size larger than available icons");
+            return;
+        }
         const gameElements = createGameRandomItems(gridSize);
 
         console.log(
@@ -225,11 +244,13 @@
             }
             newGameElements.push(rowsArr);
         }
-        console.log(newGameElements);
         updateGameStore((state) => {
             state.gameElements = newGameElements;
             return state;
         });
+        console.log(newGameElements, $gameStore.gameElements);
+        creatingGrid = false;
+        console.log("done creating grid");
         app.stage.addChild(gridContainer);
     }
 </script>

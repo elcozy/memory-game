@@ -8,7 +8,8 @@
         Text,
     } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
-    import { centerItem, restartGame, setDimensions } from "../constants";
+    import { EPlayerNum, GameSize, GameType, centerItem } from "../constants";
+    import { gameStore, updateGameStore } from "../store";
 
     export let app: Application;
 
@@ -23,7 +24,13 @@
     let grid6TextPixi: Text;
     let startGameTextPixi: Text;
     let startGameBtn: Graphics;
+    let numOfPlayersBtns: { number?: { btn: Graphics; text: Text } };
 
+    const btnTextProps: any = {
+        fontSize: 18,
+        fill: 0xffffff,
+        fontWeight: "bold",
+    };
     const padding = 15;
     const cardPadding = 20;
     const cardGap = 15;
@@ -31,22 +38,32 @@
     const containerWidth = 600;
     const containerHeight = 800;
 
+    const themeBtnW = containerWidth / 2 - cardGap / 2 - cardPadding;
+    const themeBtnR = 30;
+    const themeBtnH = 50;
+
     onMount(() => {
         mainScreenContainer = new Container();
+        mainScreenContainer.position.set(cardPadding);
 
         const themeContainer = createTheme();
         themeContainer.position.set(0);
 
+        const playersContainer = createPlayers();
+        playersContainer.position.set(
+            0,
+            themeContainer.y + themeContainer.height + padding
+        );
         const gridContainer = createGrid();
         gridContainer.position.set(
             0,
-            themeContainer.y + themeContainer.height + padding
+            playersContainer.y + playersContainer.height + padding
         );
 
         const startBtnContainer = createStartBtn();
         startBtnContainer.position.set(
             0,
-            gridContainer.y + gridContainer.height + padding + 50
+            gridContainer.y + gridContainer.height + padding
         );
         // gridContainer.position.set(10, 100);
 
@@ -65,30 +82,25 @@
     function createTheme() {
         const themeContainer = new Container();
 
-        const cardPadding = 20;
-        const cardGap = 15;
-
-        const themeBtnW = containerWidth / 2;
-        const themeBtnR = 30;
-        const themeBtnH = 50;
-
         selectThemeTextPixi = new Text("Select Theme", {
-            fontSize: 24,
-            // fontWeight: "bold",
+            fontSize: 20,
+            fill: 0x7191a5,
+            fontWeight: "bold",
         });
-        themeNumTextPixi = new Text("Numbers", {
-            fontSize: 18,
-            // fontWeight: "bold",
-        });
-        themeIconsTextPixi = new Text("Icons", {
-            fontSize: 18,
-            // fontWeight: "bold",
-        });
+        themeNumTextPixi = new Text("Numbers", { ...btnTextProps });
+        themeIconsTextPixi = new Text("Icons", { ...btnTextProps });
 
         const themeNumBtn = new Graphics();
         const themeIconsBtn = new Graphics();
+        const activeBtnColor = 0x304859;
+        const normalBtnColor = 0xbcced9;
+        const hoverBtnColor = 0x6395b8;
 
-        themeNumBtn.beginFill(0xdfe7ec);
+        themeNumBtn.beginFill(
+            $gameStore.gridType === GameType.Numbers
+                ? activeBtnColor
+                : normalBtnColor
+        );
         themeNumBtn.drawRoundedRect(0, 0, themeBtnW, themeBtnH, themeBtnR);
         themeNumBtn.endFill();
         themeNumBtn.interactive = true;
@@ -97,7 +109,11 @@
             console.log("selected theme number");
         });
 
-        themeIconsBtn.beginFill(0xdfe7ec);
+        themeIconsBtn.beginFill(
+            $gameStore.gridType === GameType.SvgIconsArr
+                ? activeBtnColor
+                : normalBtnColor
+        );
         themeIconsBtn.drawRoundedRect(0, 0, themeBtnW, themeBtnH, themeBtnR);
         themeIconsBtn.endFill();
         themeIconsBtn.interactive = true;
@@ -106,15 +122,60 @@
             console.log("New themeIconsBtn");
         });
 
-        mainScreenContainer.position.set(10);
-        selectThemeTextPixi.position.set(cardPadding);
+        const setBtnState = (element, color = normalBtnColor) => {
+            element.clear();
+            element.beginFill(color);
+            // element.beginFill(isOver ? hoverBtnColor : normalBtnColor);
+            element.drawRoundedRect(0, 0, themeBtnW, themeBtnH, themeBtnR);
+            element.endFill();
+        };
+
+        themeNumBtn.on("pointerover", () => {
+            if ($gameStore.gridType === GameType.Numbers) return;
+            setBtnState(themeNumBtn, hoverBtnColor);
+        });
+
+        themeNumBtn.on("pointerout", () => {
+            if ($gameStore.gridType === GameType.Numbers) return;
+
+            setBtnState(themeNumBtn, normalBtnColor);
+        });
+        themeNumBtn.on("pointerdown", () => {
+            updateGameStore((state) => {
+                state.gridType = GameType.Numbers;
+                return state;
+            });
+            setBtnState(themeNumBtn, activeBtnColor);
+            setBtnState(themeIconsBtn, normalBtnColor);
+        });
+        themeIconsBtn.on("pointerdown", () => {
+            updateGameStore((state) => {
+                state.gridType = GameType.SvgIconsArr;
+                return state;
+            });
+            setBtnState(themeIconsBtn, activeBtnColor);
+            setBtnState(themeNumBtn, normalBtnColor);
+        });
+        themeIconsBtn.on("pointerover", () => {
+            if ($gameStore.gridType === GameType.SvgIconsArr) return;
+
+            setBtnState(themeIconsBtn, hoverBtnColor);
+        });
+
+        themeIconsBtn.on("pointerout", () => {
+            if ($gameStore.gridType === GameType.SvgIconsArr) return;
+
+            setBtnState(themeIconsBtn, normalBtnColor);
+        });
+
+        selectThemeTextPixi.position.set(0);
 
         themeNumBtn.position.set(
-            cardPadding,
+            0,
             selectThemeTextPixi.y + selectThemeTextPixi.height + cardGap
         );
         themeIconsBtn.position.set(
-            2 * cardPadding + themeNumBtn.width,
+            cardGap + themeNumBtn.width,
             selectThemeTextPixi.y + selectThemeTextPixi.height + cardGap
         );
 
@@ -136,62 +197,109 @@
     function createGrid() {
         const gridContainer = new Container();
 
-        const themeBtnW = 250;
-        const themeBtnR = 30;
-        const themeBtnH = 50;
-
         gridSizeTextPixi = new Text("Grid Size", {
-            fontSize: 24,
+            fontSize: 20,
             // fontWeight: "bold",
         });
-        grid4TextPixi = new Text("4", {
-            fontSize: 18,
-            // fontWeight: "bold",
-        });
-        grid6TextPixi = new Text("6", {
-            fontSize: 18,
-            // fontWeight: "bold",
-        });
+        grid4TextPixi = new Text("4", { ...btnTextProps });
+        grid6TextPixi = new Text("6", { ...btnTextProps });
 
-        const themeNumBtn = new Graphics();
-        const themeIconsBtn = new Graphics();
+        const grid4Btn = new Graphics();
+        const grid6Btn = new Graphics();
+        const activeBtnColor = 0x304859;
+        const normalBtnColor = 0xbcced9;
+        const hoverBtnColor = 0x6395b8;
 
-        themeNumBtn.beginFill(0xdfe7ec);
-        themeNumBtn.drawRoundedRect(0, 0, themeBtnW, themeBtnH, themeBtnR);
-        themeNumBtn.endFill();
-        themeNumBtn.interactive = true;
-        themeNumBtn.cursor = "pointer";
-        themeNumBtn.on("mousedown", () => {
-            console.log("selected theme number");
-        });
-
-        themeIconsBtn.beginFill(0xdfe7ec);
-        themeIconsBtn.drawRoundedRect(0, 0, themeBtnW, themeBtnH, themeBtnR);
-        themeIconsBtn.endFill();
-        themeIconsBtn.interactive = true;
-        themeIconsBtn.cursor = "pointer";
-        themeIconsBtn.on("mousedown", () => {
-            console.log("New themeIconsBtn");
+        grid4Btn.beginFill(
+            $gameStore.gridSize === GameSize.Four
+                ? activeBtnColor
+                : normalBtnColor
+        );
+        grid4Btn.drawRoundedRect(0, 0, themeBtnW, themeBtnH, themeBtnR);
+        grid4Btn.endFill();
+        grid4Btn.interactive = true;
+        grid4Btn.cursor = "pointer";
+        grid4Btn.on("mousedown", () => {
+            console.log(4);
         });
 
-        gridSizeTextPixi.position.set(cardPadding);
+        grid6Btn.beginFill(
+            $gameStore.gridSize === GameSize.Six
+                ? activeBtnColor
+                : normalBtnColor
+        );
+        grid6Btn.drawRoundedRect(0, 0, themeBtnW, themeBtnH, themeBtnR);
+        grid6Btn.endFill();
+        grid6Btn.interactive = true;
+        grid6Btn.cursor = "pointer";
+        grid6Btn.on("mousedown", () => {
+            console.log(6);
+        });
 
-        themeNumBtn.position.set(
-            cardPadding,
+        const setBtnState = (element, color = normalBtnColor) => {
+            element.clear();
+            element.beginFill(color);
+            // element.beginFill(isOver ? hoverBtnColor : normalBtnColor);
+            element.drawRoundedRect(0, 0, themeBtnW, themeBtnH, themeBtnR);
+            element.endFill();
+        };
+
+        grid4Btn.on("pointerover", () => {
+            if ($gameStore.gridType === GameType.Numbers) return;
+            setBtnState(grid4Btn, hoverBtnColor);
+        });
+
+        grid4Btn.on("pointerout", () => {
+            if ($gameStore.gridType === GameType.Numbers) return;
+
+            setBtnState(grid4Btn, normalBtnColor);
+        });
+        grid4Btn.on("pointerdown", () => {
+            updateGameStore((state) => {
+                state.gridSize = GameSize.Four;
+                return state;
+            });
+            setBtnState(grid4Btn, activeBtnColor);
+            setBtnState(grid6Btn, normalBtnColor);
+        });
+        grid6Btn.on("pointerdown", () => {
+            updateGameStore((state) => {
+                state.gridSize = GameSize.Six;
+                return state;
+            });
+            setBtnState(grid6Btn, activeBtnColor);
+            setBtnState(grid4Btn, normalBtnColor);
+        });
+        grid6Btn.on("pointerover", () => {
+            if ($gameStore.gridType === GameType.SvgIconsArr) return;
+
+            setBtnState(grid6Btn, hoverBtnColor);
+        });
+
+        grid6Btn.on("pointerout", () => {
+            if ($gameStore.gridType === GameType.SvgIconsArr) return;
+
+            setBtnState(grid6Btn, normalBtnColor);
+        });
+
+        gridSizeTextPixi.position.set(0);
+
+        grid4Btn.position.set(
+            0,
             gridSizeTextPixi.y + gridSizeTextPixi.height + cardGap
         );
-        themeIconsBtn.position.set(
-            2 * cardPadding + themeNumBtn.width,
+        grid6Btn.position.set(
+            cardGap + grid4Btn.width,
             gridSizeTextPixi.y + gridSizeTextPixi.height + cardGap
         );
 
-        centerItem(grid4TextPixi, themeNumBtn);
-        centerItem(grid6TextPixi, themeIconsBtn);
+        centerItem(grid4TextPixi, grid4Btn);
+        centerItem(grid6TextPixi, grid6Btn);
 
         gridContainer.addChild(
-            themeIconsBtn,
+            grid6Btn,
             gridSizeTextPixi,
-            themeNumBtn,
+            grid4Btn,
             grid4TextPixi,
             grid6TextPixi
         );
@@ -200,28 +308,149 @@
         return gridContainer;
     }
 
+    function createPlayers() {
+        const gridContainer = new Container();
+        const playersNoArr = [
+            EPlayerNum.One,
+            EPlayerNum.Two,
+            EPlayerNum.Three,
+            EPlayerNum.Four,
+        ];
+        numOfPlayersBtns = {};
+        console.log(playersNoArr.length);
+        const numOfPlayersBtnsW =
+            containerWidth / playersNoArr.length -
+            (cardPadding / playersNoArr.length) * 2 +
+            cardGap / playersNoArr.length -
+            cardGap;
+
+        numOfPlayersTextPixi = new Text("Number of Players", {
+            fontSize: 20,
+            // fontWeight: "bold",
+        });
+
+        numOfPlayersTextPixi.position.set(0);
+
+        gridContainer.addChild(numOfPlayersTextPixi);
+        const activeBtnColor = 0x304859;
+        const normalBtnColor = 0xbcced9;
+        const hoverBtnColor = 0x6395b8;
+
+        const setBtnState = (element, color = normalBtnColor) => {
+            element.clear();
+            element.beginFill(color);
+            element.drawRoundedRect(
+                0,
+                0,
+                numOfPlayersBtnsW,
+                themeBtnH,
+                themeBtnR
+            );
+            element.endFill();
+        };
+
+        const updatePlayerBtnStates = (currSelected) => {
+            playersNoArr.map((playerNum, i) => {
+                console.log(numOfPlayersBtns);
+                setBtnState(
+                    numOfPlayersBtns[i].btn,
+                    playerNum === currSelected ? activeBtnColor : normalBtnColor
+                );
+            });
+        };
+
+        playersNoArr.map((playerNum, i) => {
+            const btn = new Graphics();
+            const text = new Text(playerNum + 1, { ...btnTextProps });
+            btn.beginFill(
+                $gameStore.playerNum === playerNum
+                    ? activeBtnColor
+                    : normalBtnColor
+            );
+            btn.drawRoundedRect(0, 0, numOfPlayersBtnsW, themeBtnH, themeBtnR);
+            btn.endFill();
+            btn.interactive = true;
+            btn.cursor = "pointer";
+
+            btn.on("pointerover", () => {
+                if ($gameStore.playerNum === playerNum) return;
+                setBtnState(btn, hoverBtnColor);
+            });
+
+            btn.on("pointerout", () => {
+                if ($gameStore.playerNum === playerNum) return;
+
+                setBtnState(btn, normalBtnColor);
+            });
+
+            btn.on("pointerdown", () => {
+                updateGameStore((state) => {
+                    state.playerNum = playerNum;
+                    return state;
+                });
+
+                updatePlayerBtnStates(playerNum);
+            });
+
+            btn.position.set(
+                i * (numOfPlayersBtnsW + cardGap),
+                numOfPlayersTextPixi.y + numOfPlayersTextPixi.height + cardGap
+            );
+
+            centerItem(text, btn);
+
+            gridContainer.addChild(btn, text);
+            numOfPlayersBtns[playerNum] = { btn, text };
+        });
+
+        mainScreenContainer.addChild(gridContainer);
+        return gridContainer;
+    }
+
     function createStartBtn() {
         const startBtnContainer = new Container();
 
-        const startBtnW = 520;
-        const startBtnR = 30;
-        const startBtnH = 50;
+        const startBtnW = containerWidth - 2 * cardPadding;
+        const startBtnR = 60;
+        const startBtnH = 57;
 
         startGameTextPixi = new Text("Start Game", {
-            fontSize: 25,
+            fontSize: 30,
+            fill: 0xffffff,
+            fontWeight: "700",
         });
         startGameBtn = new Graphics();
 
-        startGameBtn.beginFill(0xdfe7ec);
+        startGameBtn.beginFill(0xfda214);
         startGameBtn.drawRoundedRect(0, 0, startBtnW, startBtnH, startBtnR);
         startGameBtn.endFill();
         startGameBtn.interactive = true;
         startGameBtn.cursor = "pointer";
         startGameBtn.on("mousedown", () => {
             console.log("Start game");
+
+            updateGameStore((state) => {
+                state.screen = "game";
+                return state;
+            });
         });
 
-        startGameBtn.position.set(cardPadding, 0);
+        const setHoverState = (isOver = true) => {
+            startGameBtn.clear();
+            startGameBtn.beginFill(isOver ? 0xffb84a : 0xfda214);
+            startGameBtn.drawRoundedRect(0, 0, startBtnW, startBtnH, startBtnR);
+            startGameBtn.endFill();
+        };
+
+        startGameBtn.on("pointerover", () => {
+            setHoverState(true);
+        });
+
+        startGameBtn.on("pointerout", () => {
+            setHoverState(false);
+        });
+
+        startGameBtn.position.set(0);
         centerItem(startGameTextPixi, startGameBtn);
         startBtnContainer.addChild(startGameBtn, startGameTextPixi);
 

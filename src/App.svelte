@@ -1,8 +1,7 @@
 <script lang="ts">
     import { Application, Assets } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
-    import { gameStore, gameScreen, welcomeMessage } from "./store";
-    import Bunny from "./components/Bunny.svelte";
+    import { gameStore, welcomeMessage } from "./store";
     import { manifest } from "./manifest";
     import GameIcons from "./components/GameIcons.svelte";
     import GameMoves from "./components/GameMoves.svelte";
@@ -54,13 +53,13 @@
     <section class="pixi-container" bind:this={pixiContainer} />
 
     {#if appLoaded}
-        {#if $gameScreen === "game"}
-            <Header {app} />
+        {#if $gameStore.screen === "game"}
             <GameIcons {app} />
+            <Header {app} />
             <GameMoves {app} />
             <GameTime {app} />
         {/if}
-        {#if $gameScreen === "main"}
+        {#if $gameStore.screen === "main"}
             <!-- <Bunny {app} /> -->
 
             <MainScreen {app} />
