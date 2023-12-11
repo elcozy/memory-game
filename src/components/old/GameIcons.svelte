@@ -3,22 +3,20 @@
         Application,
         Assets,
         Container,
-        FXAAFilter,
         Graphics,
-        RenderTexture,
         Sprite,
         Text,
     } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
-    import { svgIconsArr } from "../manifest";
+    import { svgIconsArr } from "../../manifest";
     import {
         GameSize,
         GameType,
         createGameRandomItems,
         setDimensions,
         shuffleArray,
-    } from "../constants";
-    import { gameStore, updateGameStore } from "../store";
+    } from "../../constants";
+    import { gameStore, updateGameStore } from "../../store";
 
     export let app: Application;
 
@@ -47,9 +45,7 @@
         await new Promise((res) => {
             newGameElements = newGameElements.map((row, i) => {
                 if (row?.length) {
-                    console.log(row);
                     row.filter((cols) => {
-                        console.log(cols);
                         cols.circle?.destroy();
                         cols.innerElement?.destroy();
                         return false;
@@ -121,28 +117,12 @@
 
         let currentCircle = 0;
 
-        const renderTexture = RenderTexture.create({
-            width: app.screen.width / 2,
-            height: app.screen.height,
-        });
-
-        const renderTextureSprite = new Sprite(renderTexture);
-
-        renderTextureSprite.filters = [new FXAAFilter()];
-        //    renderTextureSprite.filters = [new PIXI.filters.FXAAFilter()];
-        // renderTextureSprite.filters = [new PIXI.filters.MSAAFilter()];
-
-        // app.stage.addChild(renderTextureSprite);
-
-        gridContainer.addChild(renderTextureSprite);
-
         for (let i = 0; i < rows; i++) {
             const rowsArr = [];
             for (let j = 0; j < columns; j++) {
                 const circle = new Graphics();
                 const currGameElement = gameElements[currentCircle];
-                const elementColor = 0xfda214;
-                // const elementColor = currGameElement.iconColor;
+                const elementColor = currGameElement.iconColor;
 
                 circle.beginFill(elementColor);
                 // circle.beginFill(0xffffc9);
@@ -170,7 +150,7 @@
                     // icon.width = 30;
                     // icon.height = 30;
 
-                    setDimensions(null, circleRadius / 1.5, circleShape);
+                    setDimensions(null, circleRadius / 1.7, circleShape);
 
                     circleShape.anchor.set(0.5);
                     circleShape.position.set(x, y);
@@ -253,8 +233,6 @@
                     gridContainer.addChild(circleNumber);
                 }
 
-                // gridContainer.cacheAsBitmap = true;
-                // gridContainer.scale.set(0.5);
                 const newObj = {
                     position: { row: i, column: j },
                     value: null,

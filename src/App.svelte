@@ -19,6 +19,8 @@
             width: 600,
             height: 800,
             backgroundColor: 0xcdf005,
+            // antialias: true,
+            // resolution: 2,
         });
 
         app.stage.interactiveChildren = true;
