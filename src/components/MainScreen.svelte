@@ -245,12 +245,12 @@
         };
 
         grid4Btn.on("pointerover", () => {
-            if ($gameStore.gridType === GameType.Numbers) return;
+            if ($gameStore.gridSize === GameSize.Four) return;
             setBtnState(grid4Btn, hoverBtnColor);
         });
 
         grid4Btn.on("pointerout", () => {
-            if ($gameStore.gridType === GameType.Numbers) return;
+            if ($gameStore.gridSize === GameSize.Four) return;
 
             setBtnState(grid4Btn, normalBtnColor);
         });
@@ -271,13 +271,13 @@
             setBtnState(grid4Btn, normalBtnColor);
         });
         grid6Btn.on("pointerover", () => {
-            if ($gameStore.gridType === GameType.SvgIconsArr) return;
+            if ($gameStore.gridSize === GameSize.Six) return;
 
             setBtnState(grid6Btn, hoverBtnColor);
         });
 
         grid6Btn.on("pointerout", () => {
-            if ($gameStore.gridType === GameType.SvgIconsArr) return;
+            if ($gameStore.gridSize === GameSize.Six) return;
 
             setBtnState(grid6Btn, normalBtnColor);
         });
@@ -351,7 +351,7 @@
 
         const updatePlayerBtnStates = (currSelected) => {
             playersNoArr.map((playerNum, i) => {
-                console.log(numOfPlayersBtns);
+                // console.log(numOfPlayersBtns);
                 setBtnState(
                     numOfPlayersBtns[i].btn,
                     playerNum === currSelected ? activeBtnColor : normalBtnColor

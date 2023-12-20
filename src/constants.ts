@@ -32,10 +32,10 @@ export type TGameStore = {
     pairs: any[];
     lastTwoMoves: any[];
     gameStarted: number;
-    numOfPlayers: number;
     activePlayerIndex: number;
     isGameFinished: boolean;
 };
+
 type gameElement = {
     value: number;
     isVisible: boolean;
@@ -58,7 +58,6 @@ export const initStore: TGameStore = {
     pairs: [],
     lastTwoMoves: [],
     gameStarted: 0,
-    numOfPlayers: 1,
     activePlayerIndex: 0,
     isGameFinished: false,
 };

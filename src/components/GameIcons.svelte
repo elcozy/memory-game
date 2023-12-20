@@ -19,6 +19,11 @@
         shuffleArray,
     } from "../constants";
     import { gameStore, updateGameStore } from "../store";
+    import {
+        handleClickGameElement,
+        hideGameElementsVisibility,
+        resetLastTwoMoves,
+    } from "../utils";
 
     export let app: Application;
 
@@ -67,7 +72,7 @@
         });
     }
     let creatingGrid = false;
-
+    let timeout2Games;
     const unsubGameStore = gameStore.subscribe(async (currStore) => {
         // if (currStore.timeElapsed === "0:00") {
 
@@ -78,7 +83,24 @@
             // destroyElements();
             // await destroyElements();
         } else {
+        }
+        if (currStore.lastTwoMoves.length === 2) {
             // createGame();
+            timeout2Games = setTimeout(() => {
+                console.log(" currStore.lastTwoMoves", currStore.lastTwoMoves);
+                if (
+                    currStore.lastTwoMoves.length &&
+                    currStore.lastTwoMoves[0].value !==
+                        currStore.lastTwoMoves[1].value
+                ) {
+                    hideGameElementsVisibility(currStore.lastTwoMoves);
+
+                    // clearTimeout(timeout2Games);
+                }
+                resetLastTwoMoves(0);
+            }, 1500);
+        } else if (currStore.lastTwoMoves.length === 0) {
+            if (timeout2Games) clearTimeout(timeout2Games);
         }
     });
 
@@ -215,8 +237,8 @@
                     circle.endFill();
                 };
 
-                // element.visible = false;
-                // setOpenState(element.visible);
+                element.visible = false;
+                setOpenState(element.visible);
 
                 currGameElement.isVisible = element.visible;
                 circle.on("mousedown", () => {
@@ -228,12 +250,14 @@
                         currentCircle
                     );
 
-                    updateGameStore((state) => {
-                        state.movesTotal += 1;
-                        state.gameElements[i][j].isVisible = !element.visible;
-                        return state;
-                    });
-                    element.visible = !element.visible;
+                    handleClickGameElement(i, j);
+
+                    // updateGameStore((state) => {
+                    //     state.movesTotal += 1;
+                    //     state.gameElements[i][j].isVisible = !element.visible;
+                    //     return state;
+                    // });
+                    // element.visible = !element.visible;
                     setOpenState(element.visible);
                 });
 
@@ -259,6 +283,7 @@
                     position: { row: i, column: j },
                     value: null,
                     circle,
+                    circleRadius,
                     innerElement: element,
                     ...currGameElement,
                 };
