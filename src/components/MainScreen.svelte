@@ -14,6 +14,7 @@
     export let app: Application;
 
     let mainScreenContainer;
+    let mainGameBg;
 
     let selectThemeTextPixi: Text;
     let numOfPlayersTextPixi: Text;
@@ -27,24 +28,40 @@
     let numOfPlayersBtns: { number?: { btn: Graphics; text: Text } };
 
     const btnTextProps: any = {
-        fontSize: 18,
+        fontSize: 26,
         fill: 0xffffff,
-        fontWeight: "bold",
+        fontFamily: "Atkinson Hyperlegible",
+        fontWeight: "600",
     };
-    const padding = 15;
-    const cardPadding = 20;
-    const cardGap = 15;
 
-    const containerWidth = 600;
+    const titleTextProps: any = {
+        fontSize: 20,
+        fill: 0x7191a5,
+        fontFamily: "Atkinson Hyperlegible",
+        fontWeight: "600",
+    };
+    const padding = 16;
+    const cardPadding = 56;
+    const cardGap = 16;
+    const cardGapY = 32;
+    const titleMarginB = 16;
+    const cardBtnGapX = 30;
+
+    const containerWidth = 654;
     const containerHeight = 800;
 
-    const themeBtnW = containerWidth / 2 - cardGap / 2 - cardPadding;
-    const themeBtnR = 30;
-    const themeBtnH = 50;
-
+    const themeBtnW = containerWidth / 2 - cardBtnGapX / 2 - cardPadding;
+    const themeBtnR = 26;
+    const themeBtnH = 52;
+    const mainGameBgR = 20;
     onMount(() => {
         mainScreenContainer = new Container();
         mainScreenContainer.position.set(cardPadding);
+
+        mainGameBg = new Graphics();
+        mainGameBg.beginFill(0xfcfcfc);
+        mainGameBg.drawRoundedRect(0, 0, 654, 559, mainGameBgR);
+        mainGameBg.endFill();
 
         const themeContainer = createTheme();
         themeContainer.position.set(0);
@@ -52,41 +69,37 @@
         const playersContainer = createPlayers();
         playersContainer.position.set(
             0,
-            themeContainer.y + themeContainer.height + padding
+            themeContainer.y + themeContainer.height + cardGapY
         );
         const gridContainer = createGrid();
         gridContainer.position.set(
             0,
-            playersContainer.y + playersContainer.height + padding
+            playersContainer.y + playersContainer.height + cardGapY
         );
 
         const startBtnContainer = createStartBtn();
         startBtnContainer.position.set(
             0,
-            gridContainer.y + gridContainer.height + padding
+            gridContainer.y + gridContainer.height + cardGapY
         );
         // gridContainer.position.set(10, 100);
 
-        app.stage.addChild(mainScreenContainer);
+        app.stage.addChild(mainGameBg, mainScreenContainer);
     });
 
     afterUpdate(() => {});
 
     onDestroy(() => {
         if (app) {
-            if (mainScreenContainer)
-                app.stage?.removeChild(mainScreenContainer);
+            if (mainScreenContainer && mainGameBg)
+                app.stage?.removeChild(mainScreenContainer, mainGameBg);
         }
     });
 
     function createTheme() {
         const themeContainer = new Container();
 
-        selectThemeTextPixi = new Text("Select Theme", {
-            fontSize: 20,
-            fill: 0x7191a5,
-            fontWeight: "bold",
-        });
+        selectThemeTextPixi = new Text("Select Theme", titleTextProps);
         themeNumTextPixi = new Text("Numbers", { ...btnTextProps });
         themeIconsTextPixi = new Text("Icons", { ...btnTextProps });
 
@@ -172,11 +185,11 @@
 
         themeNumBtn.position.set(
             0,
-            selectThemeTextPixi.y + selectThemeTextPixi.height + cardGap
+            selectThemeTextPixi.y + selectThemeTextPixi.height + titleMarginB
         );
         themeIconsBtn.position.set(
-            cardGap + themeNumBtn.width,
-            selectThemeTextPixi.y + selectThemeTextPixi.height + cardGap
+            cardBtnGapX + themeNumBtn.width,
+            selectThemeTextPixi.y + selectThemeTextPixi.height + titleMarginB
         );
 
         centerItem(themeNumTextPixi, themeNumBtn);
@@ -193,16 +206,110 @@
         mainScreenContainer.addChild(themeContainer);
         return themeContainer;
     }
+    function createPlayers() {
+        const gridContainer = new Container();
+        const playersNoArr = [
+            EPlayerNum.One,
+            EPlayerNum.Two,
+            EPlayerNum.Three,
+            EPlayerNum.Four,
+        ];
+        numOfPlayersBtns = {};
+        console.log(playersNoArr.length);
+        const numOfPlayersBtnsW =
+            containerWidth / playersNoArr.length -
+            (cardPadding / playersNoArr.length) * 2 +
+            cardGap / playersNoArr.length -
+            cardGap;
+
+        numOfPlayersTextPixi = new Text("Number of Players", titleTextProps);
+
+        numOfPlayersTextPixi.position.set(0);
+
+        gridContainer.addChild(numOfPlayersTextPixi);
+        const activeBtnColor = 0x304859;
+        const normalBtnColor = 0xbcced9;
+        const hoverBtnColor = 0x6395b8;
+
+        const setBtnState = (element, color = normalBtnColor) => {
+            element.clear();
+            element.beginFill(color);
+            element.drawRoundedRect(
+                0,
+                0,
+                numOfPlayersBtnsW,
+                themeBtnH,
+                themeBtnR
+            );
+            element.endFill();
+        };
+
+        const updatePlayerBtnStates = (currSelected) => {
+            playersNoArr.map((playerNum, i) => {
+                // console.log(numOfPlayersBtns);
+                setBtnState(
+                    numOfPlayersBtns[i].btn,
+                    playerNum === currSelected ? activeBtnColor : normalBtnColor
+                );
+            });
+        };
+
+        playersNoArr.map((playerNum, i) => {
+            const btn = new Graphics();
+            const text = new Text(playerNum + 1, { ...btnTextProps });
+            btn.beginFill(
+                $gameStore.playerNum === playerNum
+                    ? activeBtnColor
+                    : normalBtnColor
+            );
+            btn.drawRoundedRect(0, 0, numOfPlayersBtnsW, themeBtnH, themeBtnR);
+            btn.endFill();
+            btn.interactive = true;
+            btn.cursor = "pointer";
+
+            btn.on("pointerover", () => {
+                if ($gameStore.playerNum === playerNum) return;
+                setBtnState(btn, hoverBtnColor);
+            });
+
+            btn.on("pointerout", () => {
+                if ($gameStore.playerNum === playerNum) return;
+
+                setBtnState(btn, normalBtnColor);
+            });
+
+            btn.on("pointerdown", () => {
+                updateGameStore((state) => {
+                    state.playerNum = playerNum;
+                    return state;
+                });
+
+                updatePlayerBtnStates(playerNum);
+            });
+
+            btn.position.set(
+                i * (numOfPlayersBtnsW + cardGap),
+                numOfPlayersTextPixi.y +
+                    numOfPlayersTextPixi.height +
+                    titleMarginB
+            );
+
+            centerItem(text, btn);
+
+            gridContainer.addChild(btn, text);
+            numOfPlayersBtns[playerNum] = { btn, text };
+        });
+
+        mainScreenContainer.addChild(gridContainer);
+        return gridContainer;
+    }
 
     function createGrid() {
         const gridContainer = new Container();
 
-        gridSizeTextPixi = new Text("Grid Size", {
-            fontSize: 20,
-            // fontWeight: "bold",
-        });
-        grid4TextPixi = new Text("4", { ...btnTextProps });
-        grid6TextPixi = new Text("6", { ...btnTextProps });
+        gridSizeTextPixi = new Text("Grid Size", titleTextProps);
+        grid4TextPixi = new Text("4x4", { ...btnTextProps });
+        grid6TextPixi = new Text("6x6", { ...btnTextProps });
 
         const grid4Btn = new Graphics();
         const grid6Btn = new Graphics();
@@ -286,11 +393,11 @@
 
         grid4Btn.position.set(
             0,
-            gridSizeTextPixi.y + gridSizeTextPixi.height + cardGap
+            gridSizeTextPixi.y + gridSizeTextPixi.height + titleMarginB
         );
         grid6Btn.position.set(
-            cardGap + grid4Btn.width,
-            gridSizeTextPixi.y + gridSizeTextPixi.height + cardGap
+            cardBtnGapX + grid4Btn.width,
+            gridSizeTextPixi.y + gridSizeTextPixi.height + titleMarginB
         );
 
         centerItem(grid4TextPixi, grid4Btn);
@@ -308,116 +415,16 @@
         return gridContainer;
     }
 
-    function createPlayers() {
-        const gridContainer = new Container();
-        const playersNoArr = [
-            EPlayerNum.One,
-            EPlayerNum.Two,
-            EPlayerNum.Three,
-            EPlayerNum.Four,
-        ];
-        numOfPlayersBtns = {};
-        console.log(playersNoArr.length);
-        const numOfPlayersBtnsW =
-            containerWidth / playersNoArr.length -
-            (cardPadding / playersNoArr.length) * 2 +
-            cardGap / playersNoArr.length -
-            cardGap;
-
-        numOfPlayersTextPixi = new Text("Number of Players", {
-            fontSize: 20,
-            // fontWeight: "bold",
-        });
-
-        numOfPlayersTextPixi.position.set(0);
-
-        gridContainer.addChild(numOfPlayersTextPixi);
-        const activeBtnColor = 0x304859;
-        const normalBtnColor = 0xbcced9;
-        const hoverBtnColor = 0x6395b8;
-
-        const setBtnState = (element, color = normalBtnColor) => {
-            element.clear();
-            element.beginFill(color);
-            element.drawRoundedRect(
-                0,
-                0,
-                numOfPlayersBtnsW,
-                themeBtnH,
-                themeBtnR
-            );
-            element.endFill();
-        };
-
-        const updatePlayerBtnStates = (currSelected) => {
-            playersNoArr.map((playerNum, i) => {
-                // console.log(numOfPlayersBtns);
-                setBtnState(
-                    numOfPlayersBtns[i].btn,
-                    playerNum === currSelected ? activeBtnColor : normalBtnColor
-                );
-            });
-        };
-
-        playersNoArr.map((playerNum, i) => {
-            const btn = new Graphics();
-            const text = new Text(playerNum + 1, { ...btnTextProps });
-            btn.beginFill(
-                $gameStore.playerNum === playerNum
-                    ? activeBtnColor
-                    : normalBtnColor
-            );
-            btn.drawRoundedRect(0, 0, numOfPlayersBtnsW, themeBtnH, themeBtnR);
-            btn.endFill();
-            btn.interactive = true;
-            btn.cursor = "pointer";
-
-            btn.on("pointerover", () => {
-                if ($gameStore.playerNum === playerNum) return;
-                setBtnState(btn, hoverBtnColor);
-            });
-
-            btn.on("pointerout", () => {
-                if ($gameStore.playerNum === playerNum) return;
-
-                setBtnState(btn, normalBtnColor);
-            });
-
-            btn.on("pointerdown", () => {
-                updateGameStore((state) => {
-                    state.playerNum = playerNum;
-                    return state;
-                });
-
-                updatePlayerBtnStates(playerNum);
-            });
-
-            btn.position.set(
-                i * (numOfPlayersBtnsW + cardGap),
-                numOfPlayersTextPixi.y + numOfPlayersTextPixi.height + cardGap
-            );
-
-            centerItem(text, btn);
-
-            gridContainer.addChild(btn, text);
-            numOfPlayersBtns[playerNum] = { btn, text };
-        });
-
-        mainScreenContainer.addChild(gridContainer);
-        return gridContainer;
-    }
-
     function createStartBtn() {
         const startBtnContainer = new Container();
 
         const startBtnW = containerWidth - 2 * cardPadding;
-        const startBtnR = 60;
-        const startBtnH = 57;
+        const startBtnR = 35;
+        const startBtnH = 70;
 
         startGameTextPixi = new Text("Start Game", {
-            fontSize: 30,
-            fill: 0xffffff,
-            fontWeight: "700",
+            ...btnTextProps,
+            fontSize: 32,
         });
         startGameBtn = new Graphics();
 

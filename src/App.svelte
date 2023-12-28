@@ -1,14 +1,15 @@
 <script lang="ts">
     import { Application, Assets } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
-    import { gameStore, welcomeMessage } from "./store";
+    import { gameStore } from "./store";
     import { manifest } from "./manifest";
     import GameIcons from "./components/GameIcons.svelte";
     import GameMoves from "./components/GameMoves.svelte";
     import GameTime from "./components/GameTime.svelte";
     import Header from "./components/Header.svelte";
     import MainScreen from "./components/MainScreen.svelte";
-
+    import "./index.scss";
+    import memoryIcon from "./assets/memory.svg";
     let pixiContainer;
 
     let app: Application;
@@ -16,10 +17,12 @@
 
     onMount(async () => {
         app = new Application({
-            width: 600,
+            width: 654,
             height: 800,
-            backgroundColor: 0xcdf005,
-            // antialias: true,
+
+            backgroundAlpha: 0,
+
+            antialias: true,
             // resolution: 2,
         });
 
@@ -36,7 +39,6 @@
         if (!pixiContainer.contains(app.view)) {
             pixiContainer.appendChild(app.view);
         }
-        welcomeMessage.set("Hello Pixi -x- Svelte");
     });
 
     const unsubGameStore = gameStore.subscribe((currGameStore) => {
@@ -49,8 +51,8 @@
     });
 </script>
 
-<section>
-    <span> {$welcomeMessage}</span>
+<section class="app-section">
+    <img src={memoryIcon} alt="memoryIcon" />
 
     <section class="pixi-container" bind:this={pixiContainer} />
 
@@ -68,3 +70,16 @@
         {/if}
     {/if}
 </section>
+
+<style lang="scss">
+    .app-section {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        img {
+            width: 20%;
+        }
+    }
+</style>

@@ -155,6 +155,9 @@ export const restartGame = () => {
     gameStore.update((prev) => {
         return {
             ...initStore,
+            gridType: prev.gridType,
+            gridSize: prev.gridSize,
+            playerNum: prev.playerNum,
             // gameElements: prev.gameElements,
             screen: "game",
         };

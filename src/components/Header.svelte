@@ -9,7 +9,13 @@
     } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
     import { updateGameStore } from "../store";
-    import { restartGame, setDimensions } from "../constants";
+    import {
+        EPlayerNum,
+        GameSize,
+        GameType,
+        restartGame,
+        setDimensions,
+    } from "../constants";
 
     export let app: Application;
 
@@ -59,6 +65,10 @@
             console.log("New Game");
             updateGameStore((state) => {
                 state.screen = "main";
+                state.gridType = GameType.SvgIconsArr;
+                state.gridSize = GameSize.Four;
+                state.playerNum = EPlayerNum.One;
+
                 return state;
             });
         });

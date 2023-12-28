@@ -1,7 +1,6 @@
 import { writable, type Writable } from "svelte/store";
 import { type TGameStore, initStore } from "./constants";
 
-export const welcomeMessage: Writable<string> = writable("");
 export const gameStore: Writable<TGameStore> = writable({ ...initStore });
 
 type TUpdateFunction = (state: TGameStore) => TGameStore;
