@@ -3,15 +3,14 @@
     import { afterUpdate, onDestroy, onMount } from "svelte";
     import { gameStore, subscribeGameStore } from "./store";
     import { manifest } from "./manifest";
-    import GameIcons from "./components/GameIcons.svelte";
     import GameTime from "./components/GameTime.svelte";
     // import Header from "./components/Header.svelte";
     import MainScreen from "./components/MainScreen.svelte";
     import "./index.scss";
     import memoryIcon from "./assets/memory.svg";
     import GameBoard from "./components/GameBoard.svelte";
-    import { onNewGameClick, onRestartClick } from "./utils";
-    import { EPlayerNum } from "./constants";
+    import { onNewGameClick, onRestartClick, setApp } from "./utils";
+    import { EPlayerNum } from "./types";
     let pixiContainer;
 
     let app: Application;
@@ -32,6 +31,8 @@
         app.stage.interactiveChildren = true;
         app.stage.sortableChildren = true;
 
+        setApp(app);
+
         await Assets.init({ manifest }).then(async () => {
             await Assets.loadBundle("svgs");
             appLoaded = true;
@@ -48,6 +49,12 @@
         console.log("currScreen", currScreen);
         if (currScreen === "main") {
             app?.renderer.resize(654, 654);
+        } else {
+            const appWidth =
+                $gameStore.playerNum === EPlayerNum.One ? 654 : 654;
+            const appHeight =
+                $gameStore.playerNum === EPlayerNum.One ? 733 : 650;
+            app?.renderer.resize(appWidth, appHeight);
         }
     });
 

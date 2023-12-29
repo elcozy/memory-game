@@ -1,7 +1,14 @@
 <script lang="ts">
     import { Application, Container, Graphics, Text } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
-    import { gameStore, updateGameStore, updateToGameStore } from "../store";
+    import {
+        gameStore,
+        subscribeGameStore,
+        timeElapsed,
+        timeSpent,
+        updateGameStore,
+        updateToGameStore,
+    } from "../store";
 
     export let app: Application;
 
@@ -25,6 +32,25 @@
     let seconds = 0;
     let interval;
 
+    const setTime = (time: string) => {
+        if (timeSpentPixi) {
+            // console.log("timeElapsed", time);
+            timeSpentPixi.text = time;
+            timeSpentPixi.position.set(
+                timeBg.width - padding - timeSpentPixi.width,
+                timeBg.height / 2 - timeSpentPixi.height / 2
+            );
+        }
+    };
+    const setMoves = (moves: number) => {
+        if (movesPixi) {
+            movesPixi.text = moves;
+            movesPixi.position.set(
+                movesBg.width - padding - movesPixi.width,
+                movesBg.height / 2 - movesPixi.height / 2
+            );
+        }
+    };
     const startTimer = () => {
         interval = setInterval(() => {
             seconds += 1;
@@ -37,7 +63,10 @@
                     ? `${minutes}:0${remainingSeconds}`
                     : `${minutes}:${remainingSeconds}`;
 
-            updateToGameStore("timeElapsed", formattedTime);
+            timeElapsed.set(formattedTime);
+            setTime(formattedTime);
+            // $gameStore.timeElapsed = formattedTime;
+            // updateToGameStore("timeElapsed", formattedTime);
         }, 1000);
     };
 
@@ -45,7 +74,6 @@
     onMount(() => {
         movesContainer = new Container();
 
-        startTimer();
         const time = createTime();
 
         const moves = createMoves();
@@ -59,47 +87,59 @@
             app.renderer.height - movesContainer.height
         );
 
+        // timeSpent.start();
+        startTimer();
         app.stage.addChild(movesContainer);
     });
 
-    let lastTimeElapsed = null;
-    let lastMoves = null;
+    const unsubTimeElapsed = timeSpent.subscribe((currTimeElapsed) => {
+        console.log(currTimeElapsed);
+        setTime(currTimeElapsed);
+        if (seconds && currTimeElapsed === "0:00") {
+            console.log("reset time to 0");
+            setTime(currTimeElapsed);
+            setMoves(0);
 
-    const unsubGameStore = gameStore.subscribe((currStore) => {
-        if (seconds && currStore.timeElapsed === "0:00") {
             seconds = 0;
+
             clearInterval(interval);
-            startTimer();
-        }
-        if (currStore.timeElapsed !== lastTimeElapsed) {
-            lastTimeElapsed = currStore.timeElapsed;
-
-            if (timeSpentPixi) {
-                timeSpentPixi.text = lastTimeElapsed;
-                timeSpentPixi.position.set(
-                    timeBg.width - padding - timeSpentPixi.width,
-                    timeBg.height / 2 - timeSpentPixi.height / 2
-                );
-            }
-        }
-
-        if (currStore.movesTotal !== lastMoves) {
-            console.log("X game", currStore);
-            lastMoves = currStore.movesTotal;
-
-            if (movesPixi) {
-                movesPixi.text = currStore.movesTotal;
-                movesPixi.position.set(
-                    movesBg.width - padding - movesPixi.width,
-                    movesBg.height / 2 - movesPixi.height / 2
-                );
-            }
+            // startTimer();
         }
     });
+    // const unsubTimeElapsed = timeElapsed.subscribe((currTimeElapsed) => {
+    //     if (seconds && currTimeElapsed === "0:00") {
+    //         console.log("reset time to 0");
+    //         setTime(currTimeElapsed);
+    //         setMoves(0);
 
+    //         seconds = 0;
+
+    //         clearInterval(interval);
+    //         // startTimer();
+    //     }
+    // });
+
+    subscribeGameStore("movesTotal", (currMoveTotal) => {
+        console.log("X game currMoveTotal", currMoveTotal);
+
+        setMoves(currMoveTotal);
+    });
+    subscribeGameStore("elementsFound", async (currElementsFound) => {
+        const gameElementsLen = Math.pow($gameStore.gameElements.length, 2);
+
+        console.log(
+            "77 currElementsFound",
+            currElementsFound,
+            "--",
+            gameElementsLen
+        );
+        if (currElementsFound === gameElementsLen) {
+            clearInterval(interval);
+        }
+    });
     onDestroy(() => {
         clearInterval(interval);
-        unsubGameStore();
+        unsubTimeElapsed();
     });
     function createTime() {
         const timeContainer = new Container();

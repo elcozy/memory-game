@@ -1,48 +1,6 @@
-import { get } from "svelte/store";
-import { gameStore, updateGameStore } from "./store";
-import { onDestroy } from "svelte";
+import { EPlayerNum, GameSize, GameType, type TGameStore } from "./types";
 
 export const maxPlayers = 4;
-export enum GameType {
-    Numbers,
-    SvgIconsArr,
-}
-
-export enum GameSize {
-    Four = 4,
-    Six = 6,
-}
-export enum EPlayerNum {
-    One,
-    Two,
-    Three,
-    Four,
-}
-
-export type TGameStore = {
-    timeSpent: number;
-    movesTotal: number;
-    timeElapsed: string;
-    gridType: GameType;
-    gridSize: GameSize;
-    screen: "game" | "main";
-    gameElements: any[];
-    playerNum: EPlayerNum;
-
-    moves: any[];
-    pairs: any[];
-    lastTwoMoves: any[];
-    gameStarted: number;
-    activePlayerIndex: number;
-    isGameFinished: boolean;
-};
-
-type gameElement = {
-    value: number;
-    isVisible: boolean;
-    isActive: boolean;
-    iconColor: number;
-};
 
 export const initStore: TGameStore = {
     timeSpent: 0,
@@ -54,6 +12,7 @@ export const initStore: TGameStore = {
     gameElements: [],
     screen: "main",
     playerNum: EPlayerNum.One,
+    elementsFound: 0,
 
     moves: [],
     pairs: [],

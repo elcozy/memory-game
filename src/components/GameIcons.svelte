@@ -12,8 +12,6 @@
     import { afterUpdate, onDestroy, onMount } from "svelte";
     import { svgIconsArr } from "../manifest";
     import {
-        GameSize,
-        GameType,
         createGameRandomItems,
         setDimensions,
         shuffleArray,
@@ -21,9 +19,10 @@
     import { gameStore, updateGameStore } from "../store";
     import {
         handleClickGameElement,
-        hideGameElementsVisibility,
         resetLastTwoMoves,
+        updateGameElementsVisibility,
     } from "../utils";
+    import type { GameSize, GameType } from "../types";
 
     export let app: Application;
 
@@ -93,7 +92,7 @@
                     currStore.lastTwoMoves[0].value !==
                         currStore.lastTwoMoves[1].value
                 ) {
-                    hideGameElementsVisibility(currStore.lastTwoMoves);
+                    updateGameElementsVisibility(currStore.lastTwoMoves);
 
                     // clearTimeout(timeout2Games);
                 }

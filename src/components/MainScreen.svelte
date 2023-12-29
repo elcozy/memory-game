@@ -8,7 +8,8 @@
         Text,
     } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
-    import { EPlayerNum, GameSize, GameType, centerItem } from "../constants";
+    import { EPlayerNum, GameSize, GameType } from "../types";
+    import { centerItem } from "../constants";
     import { gameStore, updateToGameStore } from "../store";
 
     export let app: Application;
@@ -70,14 +71,11 @@
         );
         mainScreenContainer.position.set(
             app.screen.width / 2 - mainGameBg.width / 2 + cardPadding,
-            app.screen.height - mainGameBg.height + cardPadding
+            mainGameBg.y + cardPadding
         );
         memoryIcon = Sprite.from(Assets.get("Memory"));
 
-        memoryIcon.position.set(
-            app.screen.width / 2 - memoryIcon.width / 2,
-            mainGameBg.y - memoryIcon.height - 30
-        );
+        memoryIcon.position.set(app.screen.width / 2 - memoryIcon.width / 2, 0);
         const themeContainer = createTheme();
         themeContainer.position.set(0);
 
