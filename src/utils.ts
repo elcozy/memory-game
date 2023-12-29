@@ -88,6 +88,35 @@ export const onNewGameClick = () => {
     updateToGameStore("movesTotal", 0);
 };
 let app: Application;
+let interval: NodeJS.Timeout;
+
+export const startTimer = () => {
+    interval = setInterval(() => {
+        timeSpent.secUpdate((prev) => {
+            const newSec = prev + 1;
+
+            const minutes = Math.floor(newSec / 60);
+            const remainingSeconds: number = newSec % 60;
+
+            const formattedTime: `${number}:${number}` =
+                remainingSeconds < 10
+                    ? `${minutes}:0${remainingSeconds}`
+                    : (`${minutes}:${remainingSeconds}` as any);
+
+            timeSpent.set(formattedTime);
+            return newSec;
+        });
+    }, 1000);
+    // interval =
+};
+export const clearTimer = () => {
+    if (interval) {
+        clearInterval(interval);
+    }
+};
+export const pauseTimer = () => {
+    clearTimer();
+};
 
 export const setApp = (gameApp: Application) => {
     app = gameApp;
@@ -108,7 +137,9 @@ export const onRestartClick = async () => {
             });
         });
     }
-    timeSpent.start();
+    timeSpent.reset();
+    clearTimer();
+    startTimer();
     // gameStore.update((prev) => {
     //     return {
     //         ...initStore,

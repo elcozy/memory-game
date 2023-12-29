@@ -114,7 +114,7 @@
             iconGrid,
         }).then((res) => {
             console.log("res", res);
-            app.stage.addChild(res);
+            if (app?.stage) app.stage.addChild(res);
         });
     }
 </script>

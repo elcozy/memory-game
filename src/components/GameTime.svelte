@@ -5,10 +5,13 @@
         gameStore,
         subscribeGameStore,
         timeElapsed,
+        timeInterval,
         timeSpent,
         updateGameStore,
         updateToGameStore,
     } from "../store";
+    import { get } from "svelte/store";
+    import { clearTimer, startTimer } from "../utils";
 
     export let app: Application;
 
@@ -29,13 +32,11 @@
             if (movesContainer) app.stage?.removeChild(movesContainer);
         }
     });
-    let seconds = 0;
-    let interval;
 
     const setTime = (time: string) => {
         if (timeSpentPixi) {
             // console.log("timeElapsed", time);
-            timeSpentPixi.text = time;
+            timeSpentPixi.text = time ?? "0:00";
             timeSpentPixi.position.set(
                 timeBg.width - padding - timeSpentPixi.width,
                 timeBg.height / 2 - timeSpentPixi.height / 2
@@ -50,24 +51,6 @@
                 movesBg.height / 2 - movesPixi.height / 2
             );
         }
-    };
-    const startTimer = () => {
-        interval = setInterval(() => {
-            seconds += 1;
-
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-
-            const formattedTime =
-                remainingSeconds < 10
-                    ? `${minutes}:0${remainingSeconds}`
-                    : `${minutes}:${remainingSeconds}`;
-
-            timeElapsed.set(formattedTime);
-            setTime(formattedTime);
-            // $gameStore.timeElapsed = formattedTime;
-            // updateToGameStore("timeElapsed", formattedTime);
-        }, 1000);
     };
 
     const cardsP = 30;
@@ -92,32 +75,11 @@
         app.stage.addChild(movesContainer);
     });
 
-    const unsubTimeElapsed = timeSpent.subscribe((currTimeElapsed) => {
-        console.log(currTimeElapsed);
-        setTime(currTimeElapsed);
-        if (seconds && currTimeElapsed === "0:00") {
-            console.log("reset time to 0");
-            setTime(currTimeElapsed);
-            setMoves(0);
+    const unsubTimeSpent = timeSpent.subscribe((currTimeSpent) => {
+        setTime(currTimeSpent);
 
-            seconds = 0;
-
-            clearInterval(interval);
-            // startTimer();
-        }
+        //
     });
-    // const unsubTimeElapsed = timeElapsed.subscribe((currTimeElapsed) => {
-    //     if (seconds && currTimeElapsed === "0:00") {
-    //         console.log("reset time to 0");
-    //         setTime(currTimeElapsed);
-    //         setMoves(0);
-
-    //         seconds = 0;
-
-    //         clearInterval(interval);
-    //         // startTimer();
-    //     }
-    // });
 
     subscribeGameStore("movesTotal", (currMoveTotal) => {
         console.log("X game currMoveTotal", currMoveTotal);
@@ -127,19 +89,15 @@
     subscribeGameStore("elementsFound", async (currElementsFound) => {
         const gameElementsLen = Math.pow($gameStore.gameElements.length, 2);
 
-        console.log(
-            "77 currElementsFound",
-            currElementsFound,
-            "--",
-            gameElementsLen
-        );
+        console.log("Found el", currElementsFound, "out of", gameElementsLen);
         if (currElementsFound === gameElementsLen) {
-            clearInterval(interval);
+            clearTimer();
         }
     });
     onDestroy(() => {
-        clearInterval(interval);
-        unsubTimeElapsed();
+        clearTimer();
+        // unsubTimeElapsed();
+        unsubTimeSpent();
     });
     function createTime() {
         const timeContainer = new Container();
@@ -156,12 +114,15 @@
         timeBg.cursor = "pointer";
 
         const timeText = new Text("Time", {
+            fontFamily: "AtkinsonHyperlegible Bold",
+
             fontSize: 18,
         });
 
         timeSpentPixi = new Text($gameStore.timeElapsed, {
+            fontFamily: "AtkinsonHyperlegible Bold",
+
             fontSize: 24,
-            fontWeight: "bolder",
         });
 
         timeText.position.set(padding, timeBg.height / 2 - timeText.height / 2);

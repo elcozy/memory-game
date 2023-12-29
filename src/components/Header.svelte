@@ -63,11 +63,11 @@
 
         const restartTextPixi = new Text("Restart", {
             fontSize: 18,
-            fontWeight: "bold",
+            fontFamily: "AtkinsonHyperlegible Bold",
         });
         const newGameTextPixi = new Text("New Game", {
             fontSize: 18,
-            fontWeight: "bold",
+            fontFamily: "AtkinsonHyperlegible Bold",
         });
 
         tileIcon.position.set(0, timeBgHeight / 2 - tileIcon.height / 2);

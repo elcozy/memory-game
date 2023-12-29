@@ -13,43 +13,23 @@ export const updateGameStore = (updateFunction: TUpdateFunction) => {
     gameStore.update(updateFunction);
 };
 
+export const timeInterval = writable<NodeJS.Timeout>();
 function createTimeCount() {
-    const { subscribe, update, set } = writable<`${number}:${number}`>("0:0");
-    let interval;
-    let seconds = 0;
+    const { subscribe, update, set } = writable<`${number}:${number}`>("0:00");
+    const secs = writable<number>(0);
+    const { subscribe: secSubscribe, update: secUpdate, set: secSet } = secs;
 
-    function startTimer() {
-        interval = setInterval(() => {
-            seconds += 1;
-
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-
-            const formattedTime =
-                remainingSeconds < 10
-                    ? `${minutes}:0${remainingSeconds}`
-                    : `${minutes}:${remainingSeconds}`;
-
-            timeElapsed.set(formattedTime);
-        }, 1000);
-    }
     return {
         subscribe,
-
-        start: () => {
-            startTimer();
-        },
-        seconds,
-        addSec: () => seconds + 1,
-        // increment: () => update((n) => n + 1),
+        secs,
+        secUpdate,
         reset: () => {
             set("0:00");
-            clearInterval(interval);
-            startTimer();
+            secSet(0);
         },
-        stop: () => {
-            clearInterval(interval);
-        },
+        update,
+        set,
+        secSubscribe,
     };
 }
 

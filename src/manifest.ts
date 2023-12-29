@@ -20,6 +20,11 @@ import Wifi from "./assets/gameIcons/Wifi.svg";
 import Title from "./assets/Title.svg";
 import MemoryIcon from "./assets/memory.svg";
 
+import Regular from "./assets/font/AtkinsonHyperlegible-Regular.ttf";
+import Bold from "./assets/font/AtkinsonHyperlegible-Bold.ttf";
+import BoldItalic from "./assets/font/AtkinsonHyperlegible-BoldItalic.ttf";
+import Italic from "./assets/font/AtkinsonHyperlegible-Italic.ttf";
+
 const svgIcons = [
     Atom,
     Bell,
@@ -54,6 +59,24 @@ export const svgIconsArr = svgIcons.map((variable) =>
         .replace(/\.[^/.]+$/, "")
 );
 
+export const fontList = [
+    {
+        name: "AtkinsonHyperlegible",
+        srcs: Regular,
+    },
+    {
+        name: "AtkinsonHyperlegible Bold",
+        srcs: Bold,
+    },
+    {
+        name: "AtkinsonHyperlegible BoldItalic",
+        srcs: BoldItalic,
+    },
+    {
+        name: "AtkinsonHyperlegible Italic",
+        srcs: Italic,
+    },
+];
 export const manifest = {
     bundles: [
         {
@@ -73,6 +96,10 @@ export const manifest = {
                     src: MemoryIcon,
                 },
             ],
+        },
+        {
+            name: "fonts",
+            assets: fontList,
         },
     ],
 };

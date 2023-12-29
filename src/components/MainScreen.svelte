@@ -32,15 +32,13 @@
     const btnTextProps: any = {
         fontSize: 26,
         fill: 0xffffff,
-        fontFamily: "Atkinson Hyperlegible",
-        fontWeight: "600",
+        fontFamily: "AtkinsonHyperlegible Bold",
     };
 
     const titleTextProps: any = {
         fontSize: 20,
         fill: 0x7191a5,
-        fontFamily: "Atkinson Hyperlegible",
-        fontWeight: "600",
+        fontFamily: "AtkinsonHyperlegible Bold",
     };
     const padding = 16;
     const cardPadding = 56;

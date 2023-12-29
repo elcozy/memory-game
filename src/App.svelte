@@ -2,7 +2,7 @@
     import { Application, Assets } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
     import { gameStore, subscribeGameStore } from "./store";
-    import { manifest } from "./manifest";
+    import { fontList, manifest } from "./manifest";
     import GameTime from "./components/GameTime.svelte";
     // import Header from "./components/Header.svelte";
     import MainScreen from "./components/MainScreen.svelte";
@@ -11,6 +11,7 @@
     import GameBoard from "./components/GameBoard.svelte";
     import { onNewGameClick, onRestartClick, setApp } from "./utils";
     import { EPlayerNum } from "./types";
+    import { initStore } from "./constants";
     let pixiContainer;
 
     let app: Application;
@@ -35,6 +36,16 @@
 
         await Assets.init({ manifest }).then(async () => {
             await Assets.loadBundle("svgs");
+            await Assets.loadBundle("fonts");
+
+            fontList.forEach((fonts) => {
+                new FontFace(fonts.name, `url(${fonts.srcs})`)
+                    .load()
+                    .then(function (loadedFontFace) {
+                        document.fonts.add(loadedFontFace);
+                    });
+            });
+
             appLoaded = true;
         });
     });
@@ -60,6 +71,7 @@
 
     onDestroy(() => {
         app.destroy(true, { children: true });
+        gameStore.set(initStore);
     });
 </script>
 
