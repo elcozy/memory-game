@@ -77,26 +77,14 @@
 
     const unsubTimeSpent = timeSpent.subscribe((currTimeSpent) => {
         setTime(currTimeSpent);
-
-        //
     });
 
     subscribeGameStore("movesTotal", (currMoveTotal) => {
-        console.log("X game currMoveTotal", currMoveTotal);
-
         setMoves(currMoveTotal);
     });
-    subscribeGameStore("elementsFound", async (currElementsFound) => {
-        const gameElementsLen = Math.pow($gameStore.gameElements.length, 2);
 
-        console.log("Found el", currElementsFound, "out of", gameElementsLen);
-        if (currElementsFound === gameElementsLen) {
-            clearTimer();
-        }
-    });
     onDestroy(() => {
         clearTimer();
-        // unsubTimeElapsed();
         unsubTimeSpent();
     });
     function createTime() {
@@ -115,7 +103,7 @@
 
         const timeText = new Text("Time", {
             fontFamily: "AtkinsonHyperlegible Bold",
-
+            fill: 0x7191a5,
             fontSize: 18,
         });
 
@@ -153,10 +141,12 @@
 
         const movesTextPixi = new Text("Moves", {
             fontSize: 18,
+            fill: 0x7191a5,
+            fontFamily: "AtkinsonHyperlegible Bold",
         });
         movesPixi = new Text($gameStore.movesTotal, {
             fontSize: 24,
-            fontWeight: "bolder",
+            fontFamily: "AtkinsonHyperlegible Bold",
         });
 
         movesTextPixi.position.set(

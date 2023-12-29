@@ -1,4 +1,4 @@
-import type { Graphics, Sprite, Text } from "pixi.js";
+import type { Container, Graphics, Sprite, Text } from "pixi.js";
 
 export enum GameSize {
     Four = 4,
@@ -42,6 +42,7 @@ export type TGameStore = {
     gameElements: GameElement[][];
     playerNum: EPlayerNum;
     elementsFound: number;
+    summaryPixi?: Container;
 
     moves: any[];
     pairs: any[];

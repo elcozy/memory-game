@@ -251,12 +251,6 @@
 
                     handleClickGameElement(i, j);
 
-                    // updateGameStore((state) => {
-                    //     state.movesTotal += 1;
-                    //     state.gameElements[i][j].isVisible = !element.visible;
-                    //     return state;
-                    // });
-                    // element.visible = !element.visible;
                     setOpenState(element.visible);
                 });
 

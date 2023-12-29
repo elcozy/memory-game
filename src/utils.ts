@@ -53,8 +53,6 @@ export const handleClickGameElement = (i, j) => {
             currElement,
         ]);
     }
-
-    updateToGameStore("movesTotal", get(gameStore).movesTotal + 1);
 };
 
 export const disableElementsActiveState = (unActiveGameArr) => {
@@ -71,22 +69,6 @@ export const disableElementsActiveState = (unActiveGameArr) => {
     });
 };
 
-export const onNewGameClick = () => {
-    console.log("New Game");
-    updateGameStore((state) => {
-        state.gridType = GameType.SvgIconsArr;
-        state.gridSize = GameSize.Four;
-        state.playerNum = EPlayerNum.One;
-
-        return state;
-    });
-    resetTimeElapsed();
-
-    updateToGameStore("lastTwoMoves", []);
-    updateToGameStore("screen", "main");
-    updateToGameStore("elementsFound", 0);
-    updateToGameStore("movesTotal", 0);
-};
 let app: Application;
 let interval: NodeJS.Timeout;
 
@@ -121,9 +103,36 @@ export const pauseTimer = () => {
 export const setApp = (gameApp: Application) => {
     app = gameApp;
 };
+
+export const onNewGameClick = async () => {
+    console.log("New Game");
+
+    if (app) {
+        if (get(gameStore).summaryPixi) {
+            app.stage?.removeChild(get(gameStore).summaryPixi);
+        }
+    }
+    updateGameStore((state) => {
+        state.gridType = GameType.SvgIconsArr;
+        state.gridSize = GameSize.Four;
+        state.playerNum = EPlayerNum.One;
+
+        return state;
+    });
+    timeSpent.reset();
+
+    updateToGameStore("lastTwoMoves", []);
+    updateToGameStore("screen", "main");
+    updateToGameStore("elementsFound", 0);
+    updateToGameStore("movesTotal", 0);
+};
 export const onRestartClick = async () => {
     console.log(app);
     if (app) {
+        if (get(gameStore).summaryPixi) {
+            app.stage?.removeChild(get(gameStore).summaryPixi);
+        }
+
         await destroyGameElements().then(async () => {
             await createGridz({
                 appWidth: app.screen.width,
@@ -140,6 +149,7 @@ export const onRestartClick = async () => {
     timeSpent.reset();
     clearTimer();
     startTimer();
+
     // gameStore.update((prev) => {
     //     return {
     //         ...initStore,
@@ -154,14 +164,12 @@ export const onRestartClick = async () => {
         state.timeSpent = initStore.timeSpent;
         return state;
     });
-    resetTimeElapsed();
+    timeSpent.reset();
+
     // updateToGameStore("lastTwoMoves", []);
     updateToGameStore("screen", "game");
     updateToGameStore("movesTotal", 0);
     updateToGameStore("elementsFound", 0);
-};
-export const resetTimeElapsed = () => {
-    timeElapsed.set("0:00");
 };
 
 export const updateGameElementsVisibility = (
@@ -233,7 +241,7 @@ export const destroyGameElements = () => {
                 if (row?.length) {
                     console.log("destroyGameElements", row);
                     row.filter((cols) => {
-                        console.log(cols);
+                        // console.log(cols);
                         cols.circle?.destroy();
                         cols.innerElement?.destroy();
                         return false;
@@ -335,7 +343,7 @@ export const createGridz = ({
                     circleShape.position.set(x, y);
                 } else {
                     circleNumber = new Text(currGameElement.value!.toString(), {
-                        fontWeight: "bolder",
+                        fontFamily: "AtkinsonHyperlegible Bold",
                         fontSize: 40,
                         fill: 0xffffff,
                     });
@@ -421,3 +429,207 @@ export const createGridz = ({
         });
     });
 };
+
+export const createBtn = ({
+    width,
+    height,
+    radius = 0,
+    defaultColor,
+    hoverColor,
+    onClickAction,
+}: {
+    width: number;
+    height: number;
+    radius: number;
+    defaultColor: number;
+    hoverColor: number;
+    onClickAction: () => void;
+}) => {
+    const customBtn = new Graphics();
+
+    customBtn.beginFill(defaultColor);
+    customBtn.drawRoundedRect(0, 0, width, height, radius);
+    customBtn.endFill();
+
+    customBtn.interactive = true;
+    customBtn.cursor = "pointer";
+    const setStateBg = (color) => {
+        customBtn.clear();
+        customBtn.beginFill(color);
+        customBtn.drawRoundedRect(0, 0, width, height, radius);
+        customBtn.endFill();
+    };
+
+    customBtn.on("mousedown", () => {
+        onClickAction();
+    });
+
+    customBtn.on("pointerover", () => {
+        setStateBg(hoverColor);
+    });
+
+    customBtn.on("pointerout", () => {
+        setStateBg(defaultColor);
+    });
+
+    return customBtn;
+};
+export const createGraphics = ({
+    width,
+    height,
+    radius = 0,
+    defaultColor,
+}: {
+    width: number;
+    height: number;
+    radius: number;
+    defaultColor: number;
+}) => {
+    const customBtn = new Graphics();
+
+    customBtn.beginFill(defaultColor);
+    customBtn.drawRoundedRect(0, 0, width, height, radius);
+    customBtn.endFill();
+
+    return customBtn;
+};
+
+export function createModalSummary(timeTaken = "0:00", movesUsed = 0) {
+    const summaryContainer = new Container();
+    const defSty = {
+        fontFamily: "AtkinsonHyperlegible Bold",
+        fontSize: 18,
+    };
+    const summaryContainerBg = createGraphics({
+        width: 654,
+        height: 510,
+        radius: 20,
+        defaultColor: 0xf2f2f2,
+    });
+    const timeBg = createGraphics({
+        width: 542,
+        height: 72,
+        radius: 10,
+        defaultColor: 0xdfe7ec,
+    });
+    const movesBg = createGraphics({
+        width: 542,
+        height: 72,
+        radius: 10,
+        defaultColor: 0xdfe7ec,
+    });
+    const restartBg = createBtn({
+        width: 264,
+        height: 52,
+        radius: 25,
+        defaultColor: 0xfda214,
+        hoverColor: 0xffb84a,
+        onClickAction: onRestartClick,
+    });
+    const newGameBg = createBtn({
+        width: 264,
+        height: 52,
+        radius: 25,
+        defaultColor: 0xdfe7ec,
+        hoverColor: 0xbcced9,
+        onClickAction: onNewGameClick,
+    });
+    const youDidTxtPixi = new Text("You did it!", {
+        ...defSty,
+        fontSize: 48,
+        fill: 0x152938,
+    });
+    const gameOverTxtPixi = new Text("Game over! Here’s how you got on…", {
+        ...defSty,
+        fontSize: 20,
+        fill: 0x7191a5,
+    });
+    const timeElapsedTxtPixi = new Text("Time Elapsed", {
+        ...defSty,
+        fill: 0x7191a5,
+    });
+    const movesTakenTxtPixi = new Text("Moves Taken", {
+        ...defSty,
+        fill: 0x7191a5,
+    });
+    const movesTxtPixi = new Text(`${movesUsed} Moves`, {
+        ...defSty,
+        fill: 0x304859,
+        fontSize: 32,
+    });
+    const timeTxtPixi = new Text(`${timeTaken}`, {
+        ...defSty,
+        fill: 0x304859,
+        fontSize: 32,
+    });
+    const restartTxtPixi = new Text("Restart", {
+        ...defSty,
+        fontSize: 20,
+        fill: 0xfcfcfc,
+    });
+    const setupNewGameTxtPixi = new Text("Setup New Game", {
+        ...defSty,
+        fontSize: 20,
+        fill: 0x304859,
+    });
+    summaryContainerBg.position.set(0);
+
+    timeBg.position.set(56, 189);
+    movesBg.position.set(56, 277);
+
+    restartBg.position.set(56, 389);
+    newGameBg.position.set(334, 389);
+
+    youDidTxtPixi.position.set(
+        summaryContainerBg.width / 2 - youDidTxtPixi.width / 2,
+        51
+    );
+    gameOverTxtPixi.position.set(
+        summaryContainerBg.width / 2 - gameOverTxtPixi.width / 2,
+        127
+    );
+    timeElapsedTxtPixi.position.set(
+        timeBg.x + 32,
+        timeBg.y + timeBg.height / 2 - timeElapsedTxtPixi.height / 2
+    );
+    movesTakenTxtPixi.position.set(
+        movesBg.x + 32,
+        movesBg.y + movesBg.height / 2 - movesTakenTxtPixi.height / 2
+    );
+    movesTxtPixi.position.set(
+        movesBg.x + movesBg.width - movesTxtPixi.width - 32,
+        movesBg.y + movesBg.height / 2 - movesTxtPixi.height / 2
+    );
+    timeTxtPixi.position.set(
+        timeBg.x + timeBg.width - timeTxtPixi.width - 32,
+        timeBg.y + timeBg.height / 2 - timeTxtPixi.height / 2
+    );
+    restartTxtPixi.position.set(
+        restartBg.x + restartBg.width / 2 - restartTxtPixi.width / 2,
+
+        restartBg.y + restartBg.height / 2 - restartTxtPixi.height / 2
+    );
+    setupNewGameTxtPixi.position.set(
+        newGameBg.x + newGameBg.width / 2 - setupNewGameTxtPixi.width / 2,
+
+        newGameBg.y + newGameBg.height / 2 - setupNewGameTxtPixi.height / 2
+    );
+    summaryContainer.addChild(
+        summaryContainerBg,
+        timeBg,
+        movesBg,
+        restartBg,
+        newGameBg,
+        newGameBg,
+        youDidTxtPixi,
+        gameOverTxtPixi,
+        timeElapsedTxtPixi,
+        movesTakenTxtPixi,
+        movesTxtPixi,
+        timeTxtPixi,
+        restartTxtPixi,
+        setupNewGameTxtPixi
+    );
+
+    return summaryContainer;
+}

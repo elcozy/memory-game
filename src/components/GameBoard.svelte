@@ -1,25 +1,28 @@
 <script lang="ts">
-    import { Application, Graphics } from "pixi.js";
+    import { Application, Container, Graphics, Text } from "pixi.js";
     import { onDestroy, onMount } from "svelte";
 
     import { EPlayerNum, GameSize, GameType } from "../types";
-    import { gameStore, subscribeGameStore } from "../store";
     import {
+        gameStore,
+        subscribeGameStore,
+        timeSpent,
+        updateToGameStore,
+    } from "../store";
+    import {
+        clearTimer,
         createGridz,
+        createModalSummary,
         destroyGameElements,
-        handleClickGameElement,
         resetLastTwoMoves,
         updateGameElementsVisibility,
     } from "../utils";
 
     export let app: Application;
 
-    let gridContainer;
-    let gameBoardBg: Graphics;
+    let gridContainer: Container;
 
     const createGame = () => {
-        console.log("hi mounted");
-
         createGrid(
             $gameStore.gridSize,
             app.renderer.width,
@@ -37,7 +40,7 @@
     async function destroyElements() {
         await destroyGameElements().then(() => {
             if (app && gridContainer) {
-                app.stage?.removeChild(gameBoardBg, gridContainer);
+                app.stage?.removeChild(gridContainer);
             }
         });
     }
@@ -47,14 +50,19 @@
 
     subscribeGameStore("elementsFound", async (currElementsFound) => {
         const gameElementsLen = Math.pow($gameStore.gameElements.length, 2);
-        console.log(
-            "currElementsFound",
-            currElementsFound,
-            "--",
-            gameElementsLen
-        );
+        console.log("Found el", currElementsFound, "out of", gameElementsLen);
+
         if (currElementsFound === gameElementsLen) {
             console.log("GAME FINISHED");
+            clearTimer();
+            const summary = createModalSummary(
+                $timeSpent,
+                $gameStore.movesTotal
+            );
+            summary.position.set(0, app.screen.height / 2 - summary.width / 2);
+            updateToGameStore("summaryPixi", summary);
+
+            if (app?.stage) app.stage.addChild(summary);
         }
     });
     subscribeGameStore("gameElements", async (currGameElement) => {
@@ -72,6 +80,9 @@
     subscribeGameStore("lastTwoMoves", async (currLastTwoMoves) => {
         console.log("currLastTwoMoves", currLastTwoMoves);
 
+        if (currLastTwoMoves.length === 1) {
+            updateToGameStore("movesTotal", $gameStore.movesTotal + 1);
+        }
         if (currLastTwoMoves.length === 2) {
             // createGame();
 
@@ -97,10 +108,6 @@
         await destroyElements();
     });
 
-    const gameBoardP = $gameStore.gridSize === 6 ? 10 : 30;
-    const gameCircleDiameter = $gameStore.gridSize === 6 ? 82 : 118;
-    const gameCircleGaps = $gameStore.gridSize === 6 ? 16 : 20;
-
     async function createGrid(
         rows: GameSize,
         containerWidth,
@@ -114,6 +121,7 @@
             iconGrid,
         }).then((res) => {
             console.log("res", res);
+            gridContainer = res;
             if (app?.stage) app.stage.addChild(res);
         });
     }

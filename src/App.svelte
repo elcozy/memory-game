@@ -8,6 +8,7 @@
     import MainScreen from "./components/MainScreen.svelte";
     import "./index.scss";
     import memoryIcon from "./assets/memory.svg";
+    import memoryDarkIcon from "./assets/memoryDark.svg";
     import GameBoard from "./components/GameBoard.svelte";
     import { onNewGameClick, onRestartClick, setApp } from "./utils";
     import { EPlayerNum } from "./types";
@@ -78,14 +79,27 @@
 <div
     class="app"
     style={`background: ${
-        $gameStore.screen === "main" ? "var(--midnightBlue)" : "var(--white)"
+        $gameStore.screen === "main"
+            ? "var(--midnightBlue)"
+            : // : $gameStore.elementsFound ===
+              //     Math.pow($gameStore.gameElements.length, 2)
+              //   ? "var(--darkGray)"
+              "var(--white)"
     };`}
 >
     <section class="app-section">
-        <img src={memoryIcon} alt="memoryIcon" />
         {#if $gameStore.screen === "game"}
-            <button on:click={onNewGameClick}>new game</button>
-            <button on:click={onRestartClick}>restart</button>
+            <div class="heading">
+                <img src={memoryDarkIcon} alt="memoryIcon" />
+                <div class="btns">
+                    <button on:click={onNewGameClick} class="new-game"
+                        >New Game</button
+                    >
+                    <button on:click={onRestartClick} class="restart"
+                        >Restart</button
+                    >
+                </div>
+            </div>
         {/if}
         <section class="pixi-container" bind:this={pixiContainer} />
         {#if appLoaded}
@@ -113,6 +127,36 @@
         gap: 20px;
         img {
             width: 20%;
+        }
+
+        .heading {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .btns {
+            display: flex;
+            gap: 10px;
+            button {
+                border: 0;
+                font-family: "Atkinson Hyperlegible", sans-serif;
+
+                font-weight: bold;
+                font-size: 20px;
+                cursor: pointer;
+                &.restart {
+                    background: var(--orange);
+                    color: var(--white);
+                    padding: 15px 25px;
+                    border-radius: 20px;
+                }
+                &.new-game {
+                    background: var(--darkGray);
+                    color: var(--darkBlue);
+                    padding: 15px 25px;
+                    border-radius: 20px;
+                }
+            }
         }
     }
 </style>
