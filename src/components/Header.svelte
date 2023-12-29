@@ -8,14 +8,8 @@
         Text,
     } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
-    import { updateGameStore } from "../store";
-    import {
-        EPlayerNum,
-        GameSize,
-        GameType,
-        restartGame,
-        setDimensions,
-    } from "../constants";
+    import { setDimensions } from "../constants";
+    import { onNewGameClick, onRestartClick } from "../utils";
 
     export let app: Application;
 
@@ -51,7 +45,7 @@
         restartBg.interactive = true;
         restartBg.cursor = "pointer";
         restartBg.on("mousedown", () => {
-            restartGame();
+            onRestartClick();
         });
 
         let newGameBg = new Graphics();
@@ -61,17 +55,7 @@
         newGameBg.endFill();
         newGameBg.interactive = true;
         newGameBg.cursor = "pointer";
-        newGameBg.on("mousedown", () => {
-            console.log("New Game");
-            updateGameStore((state) => {
-                state.screen = "main";
-                state.gridType = GameType.SvgIconsArr;
-                state.gridSize = GameSize.Four;
-                state.playerNum = EPlayerNum.One;
-
-                return state;
-            });
-        });
+        newGameBg.on("mousedown", onNewGameClick);
 
         const tileIcon = Sprite.from(Assets.get("Title"));
 

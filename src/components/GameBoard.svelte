@@ -3,24 +3,33 @@
         Application,
         Assets,
         Container,
+        FXAAFilter,
         Graphics,
+        RenderTexture,
         Sprite,
         Text,
     } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
-    import { svgIconsArr } from "../../manifest";
+    import { svgIconsArr } from "../manifest";
     import {
+        EPlayerNum,
         GameSize,
         GameType,
         createGameRandomItems,
         setDimensions,
         shuffleArray,
-    } from "../../constants";
-    import { gameStore, updateGameStore, updateToGameStore } from "../../store";
+    } from "../constants";
+    import { gameStore, updateGameStore } from "../store";
+    import {
+        handleClickGameElement,
+        hideGameElementsVisibility,
+        resetLastTwoMoves,
+    } from "../utils";
 
     export let app: Application;
 
     let gridContainer;
+    let gameBoardBg: Graphics;
     let newGameElements = [];
 
     let icons;
@@ -37,6 +46,11 @@
     };
     onMount(() => {
         createGame();
+
+        const appWidth = $gameStore.playerNum === EPlayerNum.One ? 654 : 654;
+        const appHeight = $gameStore.playerNum === EPlayerNum.One ? 733 : 650;
+        console.log("updateSolo", $gameStore.playerNum === EPlayerNum.One);
+        app?.renderer.resize(appWidth, appHeight);
     });
 
     async function destroyElements() {
@@ -45,7 +59,9 @@
         await new Promise((res) => {
             newGameElements = newGameElements.map((row, i) => {
                 if (row?.length) {
+                    console.log(row);
                     row.filter((cols) => {
+                        console.log(cols);
                         cols.circle?.destroy();
                         cols.innerElement?.destroy();
                         return false;
@@ -63,7 +79,7 @@
         });
     }
     let creatingGrid = false;
-
+    let timeout2Games;
     const unsubGameStore = gameStore.subscribe(async (currStore) => {
         // if (currStore.timeElapsed === "0:00") {
 
@@ -74,18 +90,38 @@
             // destroyElements();
             // await destroyElements();
         } else {
+        }
+        if (currStore.lastTwoMoves.length === 2) {
             // createGame();
+            timeout2Games = setTimeout(() => {
+                console.log(" currStore.lastTwoMoves", currStore.lastTwoMoves);
+                if (
+                    currStore.lastTwoMoves.length &&
+                    currStore.lastTwoMoves[0].value !==
+                        currStore.lastTwoMoves[1].value
+                ) {
+                    hideGameElementsVisibility(currStore.lastTwoMoves);
+
+                    // clearTimeout(timeout2Games);
+                }
+                resetLastTwoMoves(0);
+            }, 1500);
+        } else if (currStore.lastTwoMoves.length === 0) {
+            if (timeout2Games) clearTimeout(timeout2Games);
         }
     });
 
     onDestroy(async () => {
         await destroyElements();
-        unsubGameStore();
-        if (app) {
-            if (gridContainer) app.stage?.removeChild(gridContainer);
+        if (app && gridContainer) {
+            app.stage?.removeChild(gameBoardBg, gridContainer);
         }
+        unsubGameStore();
     });
 
+    const gameBoardP = $gameStore.gridSize === 6 ? 10 : 30;
+    const gameCircleDiameter = $gameStore.gridSize === 6 ? 82 : 118;
+    const gameCircleGaps = $gameStore.gridSize === 6 ? 16 : 20;
     function createGrid(
         rows: GameSize,
         containerWidth,
@@ -94,8 +130,8 @@
     ) {
         creatingGrid = true;
         const gap = 10;
-        let circleDiameter = containerWidth / rows - gap - gap / rows;
-        let circleRadius = circleDiameter / 2;
+        // let circleDiameter = containerWidth / rows - gap - gap / rows;
+        let circleRadius = gameCircleDiameter / 2;
 
         const gridSize = Math.pow(rows, 2);
         console.log("gridSize", gridSize, icons.length);
@@ -111,18 +147,39 @@
             circleRadius,
             circleRadius / 1.7
         );
-        gridContainer = new Container();
 
-        gridContainer.position.set(0, 67 + 15);
+        gridContainer = new Container();
+        gameBoardBg = new Graphics();
+        gameBoardBg.beginFill(0xfcfcfc);
+        gameBoardBg.drawRect(0, 0, 592, 592);
+        gameBoardBg.endFill();
+
+        gridContainer.position.set(
+            app.screen.width / 2 - gameBoardBg.width / 2,
+            0
+        );
 
         let currentCircle = 0;
+
+        const renderTexture = RenderTexture.create({
+            width: app.screen.width / 2,
+            height: app.screen.height,
+        });
+
+        //    renderTextureSprite.filters = [new PIXI.filters.FXAAFilter()];
+        // renderTextureSprite.filters = [new PIXI.filters.MSAAFilter()];
+
+        // app.stage.addChild(renderTextureSprite);
+
+        gridContainer.addChild(gameBoardBg);
 
         for (let i = 0; i < rows; i++) {
             const rowsArr = [];
             for (let j = 0; j < columns; j++) {
                 const circle = new Graphics();
                 const currGameElement = gameElements[currentCircle];
-                const elementColor = currGameElement.iconColor;
+                const elementColor = 0xfda214;
+                // const elementColor = currGameElement.iconColor;
 
                 circle.beginFill(elementColor);
                 // circle.beginFill(0xffffc9);
@@ -130,9 +187,17 @@
                 circle.drawCircle(0, 0, circleRadius);
                 circle.endFill();
 
-                const x = j * (circleDiameter + gap) + circleRadius + gap;
-                const y = i * (circleDiameter + gap) + circleRadius + gap;
-
+                const startPos = gameCircleDiameter / 2 + gameBoardP;
+                const x = i * (gameCircleDiameter + gameCircleGaps) + startPos;
+                const y = j * (gameCircleDiameter + gameCircleGaps) + startPos;
+                // const y = circleDiameter / 2.4;
+                // const y = i * (circleDiameter + gap) + circleRadius + gap;
+                // const x = j * (circleDiameter + gap) + circleRadius + gap;
+                // const y = i * (circleDiameter + gap) + circleRadius + gap;
+                console.log({
+                    gameCircleGaps,
+                    gameCircleDiameter,
+                });
                 circle.position.set(x, y);
 
                 circle.interactive = true;
@@ -150,7 +215,7 @@
                     // icon.width = 30;
                     // icon.height = 30;
 
-                    setDimensions(null, circleRadius / 1.7, circleShape);
+                    setDimensions(null, circleRadius / 1.5, circleShape);
 
                     circleShape.anchor.set(0.5);
                     circleShape.position.set(x, y);
@@ -195,8 +260,8 @@
                     circle.endFill();
                 };
 
-                // element.visible = false;
-                // setOpenState(element.visible);
+                element.visible = false;
+                setOpenState(element.visible);
 
                 currGameElement.isVisible = element.visible;
                 circle.on("mousedown", () => {
@@ -208,13 +273,14 @@
                         currentCircle
                     );
 
-                    updateGameStore((state) => {
-                        state.movesTotal += 1;
-                        state.gameElements[i][j].isVisible = !element.visible;
-                        return state;
-                    });
+                    handleClickGameElement(i, j);
 
-                    element.visible = !element.visible;
+                    // updateGameStore((state) => {
+                    //     state.movesTotal += 1;
+                    //     state.gameElements[i][j].isVisible = !element.visible;
+                    //     return state;
+                    // });
+                    // element.visible = !element.visible;
                     setOpenState(element.visible);
                 });
 
@@ -234,10 +300,13 @@
                     gridContainer.addChild(circleNumber);
                 }
 
+                // gridContainer.cacheAsBitmap = true;
+                // gridContainer.scale.set(0.5);
                 const newObj = {
                     position: { row: i, column: j },
                     value: null,
                     circle,
+                    circleRadius,
                     innerElement: element,
                     ...currGameElement,
                 };

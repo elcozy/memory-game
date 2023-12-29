@@ -1,5 +1,6 @@
 import { get } from "svelte/store";
-import { gameStore, updateGameStore } from "./store";
+import { gameStore, updateGameStore, updateToGameStore } from "./store";
+import { EPlayerNum, GameSize, GameType, initStore } from "./constants";
 
 export const setGameFinished = () => {
     updateGameStore((state) => {
@@ -70,4 +71,29 @@ export const hideGameElementsVisibility = (hideGameArr) => {
 
         return state;
     });
+};
+
+export const onNewGameClick = () => {
+    console.log("New Game");
+    updateGameStore((state) => {
+        state.gridType = GameType.SvgIconsArr;
+        state.gridSize = GameSize.Four;
+        state.playerNum = EPlayerNum.One;
+
+        return state;
+    });
+
+    updateToGameStore("screen", "main");
+};
+export const onRestartClick = () => {
+    gameStore.update((prev) => {
+        return {
+            ...initStore,
+            gridType: prev.gridType,
+            gridSize: prev.gridSize,
+            playerNum: prev.playerNum,
+            // gameElements: prev.gameElements,
+        };
+    });
+    updateToGameStore("screen", "game");
 };

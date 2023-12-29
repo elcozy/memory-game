@@ -9,12 +9,13 @@
     } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
     import { EPlayerNum, GameSize, GameType, centerItem } from "../constants";
-    import { gameStore, updateGameStore } from "../store";
+    import { gameStore, updateToGameStore } from "../store";
 
     export let app: Application;
 
-    let mainScreenContainer;
-    let mainGameBg;
+    let mainScreenContainer: Container;
+    let mainGameBg: Graphics;
+    let memoryIcon: Sprite;
 
     let selectThemeTextPixi: Text;
     let numOfPlayersTextPixi: Text;
@@ -63,6 +64,20 @@
         mainGameBg.drawRoundedRect(0, 0, 654, 559, mainGameBgR);
         mainGameBg.endFill();
 
+        mainGameBg.position.set(
+            app.screen.width / 2 - mainGameBg.width / 2,
+            app.screen.height - mainGameBg.height
+        );
+        mainScreenContainer.position.set(
+            app.screen.width / 2 - mainGameBg.width / 2 + cardPadding,
+            app.screen.height - mainGameBg.height + cardPadding
+        );
+        memoryIcon = Sprite.from(Assets.get("Memory"));
+
+        memoryIcon.position.set(
+            app.screen.width / 2 - memoryIcon.width / 2,
+            mainGameBg.y - memoryIcon.height - 30
+        );
         const themeContainer = createTheme();
         themeContainer.position.set(0);
 
@@ -84,7 +99,7 @@
         );
         // gridContainer.position.set(10, 100);
 
-        app.stage.addChild(mainGameBg, mainScreenContainer);
+        app.stage.addChild(mainGameBg, memoryIcon, mainScreenContainer);
     });
 
     afterUpdate(() => {});
@@ -92,7 +107,11 @@
     onDestroy(() => {
         if (app) {
             if (mainScreenContainer && mainGameBg)
-                app.stage?.removeChild(mainScreenContainer, mainGameBg);
+                app.stage?.removeChild(
+                    mainScreenContainer,
+                    memoryIcon,
+                    mainGameBg
+                );
         }
     });
 
@@ -154,18 +173,14 @@
             setBtnState(themeNumBtn, normalBtnColor);
         });
         themeNumBtn.on("pointerdown", () => {
-            updateGameStore((state) => {
-                state.gridType = GameType.Numbers;
-                return state;
-            });
+            updateToGameStore("gridType", GameType.Numbers);
+
             setBtnState(themeNumBtn, activeBtnColor);
             setBtnState(themeIconsBtn, normalBtnColor);
         });
         themeIconsBtn.on("pointerdown", () => {
-            updateGameStore((state) => {
-                state.gridType = GameType.SvgIconsArr;
-                return state;
-            });
+            updateToGameStore("gridType", GameType.SvgIconsArr);
+
             setBtnState(themeIconsBtn, activeBtnColor);
             setBtnState(themeNumBtn, normalBtnColor);
         });
@@ -279,11 +294,7 @@
             });
 
             btn.on("pointerdown", () => {
-                updateGameStore((state) => {
-                    state.playerNum = playerNum;
-                    return state;
-                });
-
+                updateToGameStore("playerNum", playerNum);
                 updatePlayerBtnStates(playerNum);
             });
 
@@ -362,18 +373,12 @@
             setBtnState(grid4Btn, normalBtnColor);
         });
         grid4Btn.on("pointerdown", () => {
-            updateGameStore((state) => {
-                state.gridSize = GameSize.Four;
-                return state;
-            });
+            updateToGameStore("gridSize", GameSize.Four);
             setBtnState(grid4Btn, activeBtnColor);
             setBtnState(grid6Btn, normalBtnColor);
         });
         grid6Btn.on("pointerdown", () => {
-            updateGameStore((state) => {
-                state.gridSize = GameSize.Six;
-                return state;
-            });
+            updateToGameStore("gridSize", GameSize.Six);
             setBtnState(grid6Btn, activeBtnColor);
             setBtnState(grid4Btn, normalBtnColor);
         });
@@ -435,11 +440,7 @@
         startGameBtn.cursor = "pointer";
         startGameBtn.on("mousedown", () => {
             console.log("Start game");
-
-            updateGameStore((state) => {
-                state.screen = "game";
-                return state;
-            });
+            updateToGameStore("screen", "game");
         });
 
         const setHoverState = (isOver = true) => {

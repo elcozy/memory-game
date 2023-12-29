@@ -1,15 +1,17 @@
 <script lang="ts">
     import { Application, Assets } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
-    import { gameStore } from "./store";
+    import { gameStore, subscribeGameStore } from "./store";
     import { manifest } from "./manifest";
     import GameIcons from "./components/GameIcons.svelte";
-    import GameMoves from "./components/GameMoves.svelte";
     import GameTime from "./components/GameTime.svelte";
-    import Header from "./components/Header.svelte";
+    // import Header from "./components/Header.svelte";
     import MainScreen from "./components/MainScreen.svelte";
     import "./index.scss";
     import memoryIcon from "./assets/memory.svg";
+    import GameBoard from "./components/GameBoard.svelte";
+    import { onNewGameClick, onRestartClick } from "./utils";
+    import { EPlayerNum } from "./constants";
     let pixiContainer;
 
     let app: Application;
@@ -18,7 +20,8 @@
     onMount(async () => {
         app = new Application({
             width: 654,
-            height: 800,
+            height: 654,
+            // height: 733,
 
             backgroundAlpha: 0,
 
@@ -41,35 +44,46 @@
         }
     });
 
-    const unsubGameStore = gameStore.subscribe((currGameStore) => {
-        // console.log("currGameStore", currGameStore);
+    subscribeGameStore("screen", (currScreen) => {
+        console.log("currScreen", currScreen);
+        if (currScreen === "main") {
+            app?.renderer.resize(654, 654);
+        }
     });
 
     onDestroy(() => {
         app.destroy(true, { children: true });
-        unsubGameStore();
     });
 </script>
 
-<section class="app-section">
-    <img src={memoryIcon} alt="memoryIcon" />
-
-    <section class="pixi-container" bind:this={pixiContainer} />
-
-    {#if appLoaded}
+<div
+    class="app"
+    style={`background: ${
+        $gameStore.screen === "main" ? "var(--midnightBlue)" : "var(--white)"
+    };`}
+>
+    <section class="app-section">
+        <img src={memoryIcon} alt="memoryIcon" />
         {#if $gameStore.screen === "game"}
-            <GameIcons {app} />
-            <Header {app} />
-            <GameMoves {app} />
-            <GameTime {app} />
+            <button on:click={onNewGameClick}>new game</button>
+            <button on:click={onRestartClick}>restart</button>
         {/if}
-        {#if $gameStore.screen === "main"}
-            <!-- <Bunny {app} /> -->
+        <section class="pixi-container" bind:this={pixiContainer} />
+        {#if appLoaded}
+            {#if $gameStore.screen === "game"}
+                <GameBoard {app} />
+                <!-- <Header {app} /> -->
+                <!-- <GameMoves {app} /> -->
+                <GameTime {app} />
+            {/if}
+            {#if $gameStore.screen === "main"}
+                <!-- <Bunny {app} /> -->
 
-            <MainScreen {app} />
+                <MainScreen {app} />
+            {/if}
         {/if}
-    {/if}
-</section>
+    </section>
+</div>
 
 <style lang="scss">
     .app-section {

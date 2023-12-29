@@ -1,5 +1,6 @@
 import { get } from "svelte/store";
 import { gameStore, updateGameStore } from "./store";
+import { onDestroy } from "svelte";
 
 export const maxPlayers = 4;
 export enum GameType {
@@ -148,21 +149,6 @@ export const createGameRandomItems = (gridSize) => {
     return newGameElements;
 };
 
-export const restartGame = () => {
-    // gameStore.set({ ...initStore, screen: "game" });
-    // gameStore.set({ ...initStore,gameElements:get(gameStore) screen: "game" });
-
-    gameStore.update((prev) => {
-        return {
-            ...initStore,
-            gridType: prev.gridType,
-            gridSize: prev.gridSize,
-            playerNum: prev.playerNum,
-            // gameElements: prev.gameElements,
-            screen: "game",
-        };
-    });
-};
 export const centerItem = (element, parent) => {
     element.position.set(
         parent.x + parent.width / 2 - element.width / 2,
