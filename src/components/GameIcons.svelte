@@ -240,7 +240,7 @@
                 setOpenState(element.visible);
 
                 currGameElement.isVisible = element.visible;
-                circle.on("mousedown", () => {
+                circle.on("pointerdown", () => {
                     console.log(
                         "clicked on:",
                         i,

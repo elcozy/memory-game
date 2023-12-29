@@ -59,12 +59,12 @@
         };
         app.view.style.cursor = "pointer";
 
-        app.view.addEventListener("mousedown", () => {
+        app.view.addEventListener("pointerdown", () => {
             isDragging = true;
             app.ticker.stop();
         });
 
-        app.view.addEventListener("mouseup", () => {
+        app.view.addEventListener("pointerup", () => {
             isDragging = false;
             app.ticker.start();
         });

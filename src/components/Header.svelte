@@ -44,7 +44,7 @@
         restartBg.endFill();
         restartBg.interactive = true;
         restartBg.cursor = "pointer";
-        restartBg.on("mousedown", () => {
+        restartBg.on("pointerdown", () => {
             onRestartClick();
         });
 
@@ -55,7 +55,7 @@
         newGameBg.endFill();
         newGameBg.interactive = true;
         newGameBg.cursor = "pointer";
-        newGameBg.on("mousedown", onNewGameClick);
+        newGameBg.on("pointerdown", onNewGameClick);
 
         const tileIcon = Sprite.from(Assets.get("Title"));
 

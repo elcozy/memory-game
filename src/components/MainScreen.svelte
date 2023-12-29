@@ -133,7 +133,7 @@
         themeNumBtn.endFill();
         themeNumBtn.interactive = true;
         themeNumBtn.cursor = "pointer";
-        themeNumBtn.on("mousedown", () => {
+        themeNumBtn.on("pointerdown", () => {
             console.log("selected theme number");
         });
 
@@ -146,7 +146,7 @@
         themeIconsBtn.endFill();
         themeIconsBtn.interactive = true;
         themeIconsBtn.cursor = "pointer";
-        themeIconsBtn.on("mousedown", () => {
+        themeIconsBtn.on("pointerdown", () => {
             console.log("New themeIconsBtn");
         });
 
@@ -333,7 +333,7 @@
         grid4Btn.endFill();
         grid4Btn.interactive = true;
         grid4Btn.cursor = "pointer";
-        grid4Btn.on("mousedown", () => {
+        grid4Btn.on("pointerdown", () => {
             console.log(4);
         });
 
@@ -346,7 +346,7 @@
         grid6Btn.endFill();
         grid6Btn.interactive = true;
         grid6Btn.cursor = "pointer";
-        grid6Btn.on("mousedown", () => {
+        grid6Btn.on("pointerdown", () => {
             console.log(6);
         });
 
@@ -434,7 +434,7 @@
         startGameBtn.endFill();
         startGameBtn.interactive = true;
         startGameBtn.cursor = "pointer";
-        startGameBtn.on("mousedown", () => {
+        startGameBtn.on("pointerdown", () => {
             console.log("Start game");
             updateToGameStore("screen", "game");
         });

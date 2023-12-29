@@ -378,7 +378,7 @@ export const createGridz = ({
 
                 currGameElement.isVisible = element.visible;
 
-                circle.on("mousedown", () => {
+                circle.on("pointerdown", () => {
                     console.log(
                         `Clicked on: ${i}, ${j}, Current Circle: ${currentCircle}`
                     );
@@ -460,7 +460,7 @@ export const createBtn = ({
         customBtn.endFill();
     };
 
-    customBtn.on("mousedown", () => {
+    customBtn.on("pointerdown", () => {
         onClickAction();
     });
 
