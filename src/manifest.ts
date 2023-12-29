@@ -17,6 +17,7 @@ import Lemon from "./assets/gameIcons/Lemon.svg";
 import Meteor from "./assets/gameIcons/Meteor.svg";
 import Sun from "./assets/gameIcons/Sun.svg";
 import Title from "./assets/Title.svg";
+import MemoryIcon from "./assets/memory.svg";
 
 const svgIcons = [
     Atom,
@@ -52,8 +53,6 @@ export const svgIconsArr = svgIcons.map((variable) =>
         .replace(/\.[^/.]+$/, "")
 );
 
-// console.log(arrayOfObjects, svgIconsArr);
-
 export const manifest = {
     bundles: [
         {
@@ -68,21 +67,11 @@ export const manifest = {
                     alias: "Title",
                     src: Title,
                 },
+                {
+                    alias: "Memory",
+                    src: MemoryIcon,
+                },
             ],
         },
-
-        // {
-        //     name: "game-screen",
-        //     assets: [
-        //         {
-        //             alias: "character",
-        //             src: "robot.png",
-        //         },
-        //         {
-        //             alias: "enemy",
-        //             src: "bad-guy.png",
-        //         },
-        //     ],
-        // },
     ],
 };
