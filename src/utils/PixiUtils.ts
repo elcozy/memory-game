@@ -201,7 +201,7 @@ const updateGameElementsVisibility = (
                 const currElementHideCircle = currElementHide.circle;
 
                 if (currElementHideCircle) {
-                    currElementHideCircle.eventMode = isVisible
+                    currElementHideCircle.eventMode = !isVisible
                         ? "static"
                         : "auto";
                     currElementHideCircle.cursor = !isVisible
