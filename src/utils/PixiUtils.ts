@@ -23,7 +23,7 @@ import {
 } from "pixi.js";
 import type { CreateGridOptions, GameElement } from "../types";
 import { svgIconsArr } from "../manifest";
-import { stopAnimation } from "./AnimationUtils";
+import { stopAnimation, Logger } from "./index";
 
 const setGameFinished = () => {
     updateGameStore((state) => {
@@ -37,7 +37,7 @@ const resetLastTwoMoves = (activePlayerIndex) => {
 
 const handleClickGameElement = (i, j) => {
     const gameStr = get(gameStore);
-    console.log("handleClickGameElement", i, j, gameStr.lastTwoMoves);
+    Logger.log("handleClickGameElement", i, j, gameStr.lastTwoMoves);
     if (gameStr.lastTwoMoves.length >= 2) return;
 
     const currElement = gameStr.gameElements[i][j];
@@ -46,7 +46,7 @@ const handleClickGameElement = (i, j) => {
 
     currElement.innerElement.visible = true;
     currElement.circle.interactive = false;
-    console.log("currElement.innerElement", currElement.innerElement);
+    Logger.log("currElement.innerElement", currElement.innerElement);
     if (gameStr.lastTwoMoves.length < 2) {
         updateToGameStore("lastTwoMoves", [
             ...gameStr.lastTwoMoves,
@@ -105,7 +105,7 @@ const setApp = (gameApp: Application) => {
 };
 
 const onNewGameClick = async () => {
-    console.log("New Game");
+    Logger.log("New Game");
 
     if (app) {
         if (get(gameStore).summaryPixi) {
@@ -128,7 +128,7 @@ const onNewGameClick = async () => {
     updateToGameStore("movesTotal", 0);
 };
 const onRestartClick = async () => {
-    console.log(app);
+    Logger.log(app);
     if (app) {
         if (get(gameStore).summaryPixi) {
             stopAnimation(get(gameStore).summaryPixi);
@@ -144,7 +144,7 @@ const onRestartClick = async () => {
                 containerWidth: app.renderer.width,
                 iconGrid: get(gameStore).gridType,
             }).then((res) => {
-                console.log("restarted", res);
+                Logger.log("restarted", res);
                 app.stage.addChild(res);
             });
         });
@@ -181,7 +181,7 @@ const updateGameElementsVisibility = (
 ) => {
     return new Promise((resolve) => {
         // updateGameStore((state) => {
-        console.log("hideGameArr", updateGameArr);
+        Logger.log("hideGameArr", updateGameArr);
         const state = get(gameStore);
         const promises = updateGameArr.map((elementToHide) => {
             return new Promise<void>((resolveElement) => {
@@ -206,7 +206,7 @@ const updateGameElementsVisibility = (
                         ? "pointer"
                         : "default";
 
-                    console.log("currElementHideCircle", currElementHideCircle);
+                    Logger.log("currElementHideCircle", currElementHideCircle);
                     currElementHideCircle.clear();
                     currElementHideCircle.beginFill(
                         isVisible ? 0xbcced9 : 0x304859
@@ -233,7 +233,7 @@ const updateGameElementsVisibility = (
     });
 };
 const destroyGameElements = () => {
-    console.log("start destroying");
+    Logger.log("start destroying");
 
     return new Promise<void>((resolve) => {
         const gameStr = get(gameStore);
@@ -242,9 +242,9 @@ const destroyGameElements = () => {
         const promises = gameElements.map((row, i) => {
             return new Promise<void>((resolveElement) => {
                 if (row?.length) {
-                    console.log("destroyGameElements", row);
+                    Logger.log("destroyGameElements", row);
                     row.filter((cols) => {
-                        // console.log(cols);
+                        // Logger.log(cols);
                         cols.circle?.destroy();
                         cols.innerElement?.destroy();
                         return false;
@@ -256,13 +256,13 @@ const destroyGameElements = () => {
         });
 
         Promise.all(promises).then(() => {
-            console.log("done destroying");
+            Logger.log("done destroying");
             resolve();
         });
     });
 };
 const destroyGameBoard = () => {
-    console.log("start destroying board");
+    Logger.log("start destroying board");
 
     return new Promise<void>((resolve) => {
         const gameStr = get(gameStore);
@@ -299,15 +299,15 @@ const createGridz = ({
         let circleRadius = gameCircleDiameter / 2;
 
         const gridSize = Math.pow(rows, 2);
-        console.log(`Grid Size: ${gridSize}, Number of Icons: ${icons.length}`);
+        Logger.log(`Grid Size: ${gridSize}, Number of Icons: ${icons.length}`);
         if (gridSize / 2 >= icons.length) {
-            console.error("Grid size larger than available icons");
+            Logger.error("Grid size larger than available icons");
             return resolve(new Container());
         }
 
         const gameElements = createGameRandomItems(gridSize);
 
-        console.log(
+        Logger.log(
             `Container Width: ${containerWidth}, Circle Radius: ${circleRadius}, Scaled Radius: ${
                 circleRadius / 1.7
             }`
@@ -396,7 +396,7 @@ const createGridz = ({
                 currGameElement.isVisible = element.visible;
 
                 circle.on("pointerdown", () => {
-                    console.log(
+                    Logger.log(
                         `Clicked on: ${i}, ${j}, Current Circle: ${currentCircle}`
                     );
                     handleClickGameElement(i, j);
@@ -442,7 +442,7 @@ const createGridz = ({
 
             updateToGameStore("gameElements", newGameElements);
             updateToGameStore("gridContainer", gridContainer);
-            console.log("Done creating grid");
+            Logger.log("Done creating grid");
             resolve(gridContainer);
         });
     });

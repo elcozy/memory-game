@@ -8,7 +8,12 @@
     import "./index.scss";
     import memoryDarkIcon from "./assets/memoryDark.svg";
     import GameBoard from "./components/GameBoard.svelte";
-    import { onNewGameClick, onRestartClick, setApp } from "./utils/index";
+    import {
+        Logger,
+        onNewGameClick,
+        onRestartClick,
+        setApp,
+    } from "./utils/index";
     import { EPlayerNum } from "./types";
     import { initStore } from "./constants";
     import { fontList } from "./assets/fontList";
@@ -54,10 +59,10 @@
 
             try {
                 await Promise.all(promises);
-                console.log("Fonts & imgs loaded");
+                Logger.log("Fonts & imgs loaded");
                 appLoaded = true;
             } catch (error) {
-                console.error("Font loading failed:", error);
+                Logger.error("Font loading failed:", error);
             }
         });
     });
@@ -69,7 +74,7 @@
     });
 
     subscribeGameStore("screen", (currScreen) => {
-        console.log("currScreen", currScreen);
+        Logger.log("currScreen", currScreen);
         if (currScreen === "main") {
             app?.renderer.resize(654, 654);
         } else {
@@ -116,7 +121,10 @@
         {#if appLoaded}
             {#if $gameStore.screen === "game"}
                 <GameBoard {app} />
-                <GameTime {app} />
+
+                {#if $gameStore.playerNum === EPlayerNum.One}
+                    <GameTime {app} />
+                {/if}
             {/if}
             {#if $gameStore.screen === "main"}
                 <MainScreen {app} />

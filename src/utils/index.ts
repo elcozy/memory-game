@@ -1,3 +1,6 @@
+import Logger from "./logger";
+export { animateModal, stopAnimation } from "./AnimationUtils";
+
 export {
     setGameFinished,
     resetLastTwoMoves,
@@ -17,5 +20,4 @@ export {
     createGraphics,
     createModalSummary,
 } from "./PixiUtils";
-
-export { animateModal, stopAnimation } from "./AnimationUtils";
+export { Logger };

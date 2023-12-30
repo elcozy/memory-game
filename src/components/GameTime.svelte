@@ -1,17 +1,9 @@
 <script lang="ts">
     import { Application, Container, Graphics, Text } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
-    import {
-        gameStore,
-        subscribeGameStore,
-        timeElapsed,
-        timeInterval,
-        timeSpent,
-        updateGameStore,
-        updateToGameStore,
-    } from "../store";
+    import { gameStore, subscribeGameStore, timeSpent } from "../store";
     import { get } from "svelte/store";
-    import { clearTimer, startTimer } from "../utils";
+    import { clearTimer, startTimer } from "../utils/index";
 
     export let app: Application;
 
@@ -35,7 +27,6 @@
 
     const setTime = (time: string) => {
         if (timeSpentPixi) {
-            // console.log("timeElapsed", time);
             timeSpentPixi.text = time ?? "0:00";
             timeSpentPixi.position.set(
                 timeBg.width - padding - timeSpentPixi.width,

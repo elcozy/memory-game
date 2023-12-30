@@ -17,6 +17,7 @@
         resetLastTwoMoves,
         updateGameElementsVisibility,
         animateModal,
+        Logger,
     } from "../utils/index";
 
     export let app: Application;
@@ -29,7 +30,7 @@
         );
 
         const appWidth = $gameStore.playerNum === EPlayerNum.One ? 654 : 654;
-        const appHeight = $gameStore.playerNum === EPlayerNum.One ? 733 : 650;
+        const appHeight = $gameStore.playerNum === EPlayerNum.One ? 733 : 600;
         app?.renderer.resize(appWidth, appHeight);
     };
 
@@ -56,25 +57,25 @@
 
     subscribeGameStore("elementsFound", async (currElementsFound) => {
         const gameElementsLen = Math.pow($gameStore.gameElements.length, 2);
-        console.log("Found el", currElementsFound, "out of", gameElementsLen);
+        Logger.log("Found el", currElementsFound, "out of", gameElementsLen);
 
         if (currElementsFound === gameElementsLen) {
-            console.log("GAME FINISHED");
+            Logger.log("GAME FINISHED");
             clearTimer();
             createSummary();
         }
     });
     subscribeGameStore("gameElements", async (currGameElement) => {
-        console.log("currGameElement", currGameElement);
+        Logger.log("currGameElement", currGameElement);
 
         if (currGameElement.length === 0 && !creatingGrid) {
             await destroyGameBoard();
-            console.log("destroyed grid on subscribe");
+            Logger.log("destroyed grid on subscribe");
         } else {
         }
     });
     subscribeGameStore("lastTwoMoves", async (currLastTwoMoves) => {
-        console.log("currLastTwoMoves", currLastTwoMoves);
+        Logger.log("currLastTwoMoves", currLastTwoMoves);
 
         if (currLastTwoMoves.length === 1) {
             updateToGameStore("movesTotal", $gameStore.movesTotal + 1);
@@ -93,7 +94,7 @@
                     currLastTwoMoves[0].value === currLastTwoMoves[1].value
                 ).then(() => resetLastTwoMoves(0));
 
-                console.log(" currLastTwoMoves", currLastTwoMoves);
+                Logger.log(" currLastTwoMoves", currLastTwoMoves);
             }, timeoutTime);
         } else if (currLastTwoMoves.length === 0) {
             if (timeout2Games) clearTimeout(timeout2Games);
@@ -116,7 +117,6 @@
             containerWidth,
             iconGrid,
         }).then((res) => {
-            console.log("res", res);
             if (app?.stage) app.stage.addChild(res);
         });
     }

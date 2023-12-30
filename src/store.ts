@@ -3,6 +3,7 @@ import { type TGameStore } from "./types";
 
 import { initStore } from "./constants";
 import { onDestroy } from "svelte";
+import { Logger } from "./utils";
 
 export const gameStore: Writable<TGameStore> = writable({ ...initStore });
 export const timeElapsed: Writable<string> = writable("0.00");
@@ -45,7 +46,7 @@ export let subscribeGameStore = <K extends keyof TGameStore>(
         if (!currGame || currGameStore[key] === currGame[key]) return;
         action(currGame[key]);
 
-        console.log("subscribe to  GameStore -", key, currGame[key]);
+        Logger.log("subscribe to  GameStore -", key, currGame[key]);
         currGameStore = currGame;
     });
 
@@ -58,7 +59,7 @@ export let updateToGameStore = <K extends keyof TGameStore>(
     key: K,
     keyUpdate: TGameStore[K]
 ) => {
-    console.log("updated store", key, keyUpdate);
+    Logger.log("updated store", key, keyUpdate);
 
     gameStore.update((currGame) => {
         return {

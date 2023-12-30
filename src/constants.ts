@@ -1,4 +1,5 @@
 import { EPlayerNum, GameSize, GameType, type TGameStore } from "./types";
+import { Logger } from "./utils";
 
 export const maxPlayers = 4;
 
@@ -104,7 +105,7 @@ export const createGameRandomItems = (gridSize) => {
 
         countInserted = 0;
     }
-    console.log(newGameElements);
+    Logger.log(newGameElements);
     return newGameElements;
 };
 

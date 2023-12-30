@@ -11,6 +11,7 @@
     import { EPlayerNum, GameSize, GameType } from "../types";
     import { centerItem } from "../constants";
     import { gameStore, updateToGameStore } from "../store";
+    import { Logger } from "../utils/index";
 
     export let app: Application;
 
@@ -93,7 +94,6 @@
             0,
             gridContainer.y + gridContainer.height + cardGapY
         );
-        // gridContainer.position.set(10, 100);
 
         app.stage.addChild(mainGameBg, memoryIcon, mainScreenContainer);
     });
@@ -134,7 +134,7 @@
         themeNumBtn.interactive = true;
         themeNumBtn.cursor = "pointer";
         themeNumBtn.on("pointerdown", () => {
-            console.log("selected theme number");
+            Logger.log("selected theme number");
         });
 
         themeIconsBtn.beginFill(
@@ -147,7 +147,7 @@
         themeIconsBtn.interactive = true;
         themeIconsBtn.cursor = "pointer";
         themeIconsBtn.on("pointerdown", () => {
-            console.log("New themeIconsBtn");
+            Logger.log("New themeIconsBtn");
         });
 
         const setBtnState = (element, color = normalBtnColor) => {
@@ -226,7 +226,7 @@
             EPlayerNum.Four,
         ];
         numOfPlayersBtns = {};
-        console.log(playersNoArr.length);
+        // Logger.log(playersNoArr.length);
         const numOfPlayersBtnsW =
             containerWidth / playersNoArr.length -
             (cardPadding / playersNoArr.length) * 2 +
@@ -257,7 +257,6 @@
 
         const updatePlayerBtnStates = (currSelected) => {
             playersNoArr.map((playerNum, i) => {
-                // console.log(numOfPlayersBtns);
                 setBtnState(
                     numOfPlayersBtns[i].btn,
                     playerNum === currSelected ? activeBtnColor : normalBtnColor
@@ -275,8 +274,13 @@
             );
             btn.drawRoundedRect(0, 0, numOfPlayersBtnsW, themeBtnH, themeBtnR);
             btn.endFill();
-            btn.interactive = true;
-            btn.cursor = "pointer";
+            if (playerNum === 0) {
+                btn.interactive = true;
+                btn.cursor = "pointer";
+            } else {
+                btn.interactive = true;
+                btn.cursor = "not-allowed";
+            }
 
             btn.on("pointerover", () => {
                 if ($gameStore.playerNum === playerNum) return;
@@ -290,6 +294,7 @@
             });
 
             btn.on("pointerdown", () => {
+                if (playerNum !== 0) return;
                 updateToGameStore("playerNum", playerNum);
                 updatePlayerBtnStates(playerNum);
             });
@@ -334,7 +339,7 @@
         grid4Btn.interactive = true;
         grid4Btn.cursor = "pointer";
         grid4Btn.on("pointerdown", () => {
-            console.log(4);
+            Logger.log(4);
         });
 
         grid6Btn.beginFill(
@@ -347,7 +352,7 @@
         grid6Btn.interactive = true;
         grid6Btn.cursor = "pointer";
         grid6Btn.on("pointerdown", () => {
-            console.log(6);
+            Logger.log(6);
         });
 
         const setBtnState = (element, color = normalBtnColor) => {
@@ -435,7 +440,7 @@
         startGameBtn.interactive = true;
         startGameBtn.cursor = "pointer";
         startGameBtn.on("pointerdown", () => {
-            console.log("Start game");
+            Logger.log("Start game");
             updateToGameStore("screen", "game");
         });
 
