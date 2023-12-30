@@ -45,7 +45,7 @@ const handleClickGameElement = (i, j) => {
     currElement.isActive = true;
 
     currElement.innerElement.visible = true;
-    currElement.circle.interactive = false;
+    currElement.circle.eventMode = "auto";
     Logger.log("currElement.innerElement", currElement.innerElement);
     if (gameStr.lastTwoMoves.length < 2) {
         updateToGameStore("lastTwoMoves", [
@@ -201,7 +201,9 @@ const updateGameElementsVisibility = (
                 const currElementHideCircle = currElementHide.circle;
 
                 if (currElementHideCircle) {
-                    currElementHideCircle.interactive = !isVisible;
+                    currElementHideCircle.eventMode = isVisible
+                        ? "static"
+                        : "auto";
                     currElementHideCircle.cursor = !isVisible
                         ? "pointer"
                         : "default";
