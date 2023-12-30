@@ -39,15 +39,27 @@
             await Assets.loadBundle("svgs");
             await Assets.loadBundle("fonts");
 
-            fontList.forEach((fonts) => {
-                new FontFace(fonts.name, `url(${fonts.srcs})`)
-                    .load()
-                    .then(function (loadedFontFace) {
-                        document.fonts.add(loadedFontFace);
+            const promises = fontList.map((fonts) => {
+                return new Promise<void>((resolveElement) => {
+                    const fontFace = new FontFace(
+                        fonts.name,
+                        `url(${fonts.srcs})`
+                    );
+
+                    fontFace.load().then(() => {
+                        document.fonts.add(fontFace);
+                        resolveElement();
                     });
+                });
             });
 
-            appLoaded = true;
+            try {
+                await Promise.all(promises);
+                console.log("Fonts & imgs loaded");
+                appLoaded = true;
+            } catch (error) {
+                console.error("Font loading failed:", error);
+            }
         });
     });
 
