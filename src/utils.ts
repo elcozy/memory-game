@@ -24,6 +24,7 @@ import {
 } from "pixi.js";
 import type { CreateGridOptions, GameElement } from "./types";
 import { svgIconsArr } from "./manifest";
+import gsap, { Power0 } from "gsap";
 
 export const setGameFinished = () => {
     updateGameStore((state) => {
@@ -109,6 +110,7 @@ export const onNewGameClick = async () => {
 
     if (app) {
         if (get(gameStore).summaryPixi) {
+            stopAnimation(get(gameStore).summaryPixi);
             app.stage?.removeChild(get(gameStore).summaryPixi);
         }
     }
@@ -130,10 +132,12 @@ export const onRestartClick = async () => {
     console.log(app);
     if (app) {
         if (get(gameStore).summaryPixi) {
+            stopAnimation(get(gameStore).summaryPixi);
+
             app.stage?.removeChild(get(gameStore).summaryPixi);
         }
 
-        await destroyGameElements().then(async () => {
+        await destroyGameBoard().then(async () => {
             await createGridz({
                 appWidth: app.screen.width,
                 appHeight: app.screen.height,
@@ -256,6 +260,23 @@ export const destroyGameElements = () => {
             console.log("done destroying");
             resolve();
         });
+    });
+};
+export const destroyGameBoard = () => {
+    console.log("start destroying board");
+
+    return new Promise<void>((resolve) => {
+        const gameStr = get(gameStore);
+        const gridContainer = gameStr.gridContainer;
+        gridContainer?.destroy({
+            children: true,
+        });
+
+        if (app && gridContainer) {
+            app.stage?.removeChild(gridContainer);
+        }
+
+        resolve();
     });
 };
 
@@ -424,6 +445,7 @@ export const createGridz = ({
             newGameElements.push(...gridRows); // flatten the array of arrays
 
             updateToGameStore("gameElements", newGameElements);
+            updateToGameStore("gridContainer", gridContainer);
             console.log("Done creating grid");
             resolve(gridContainer);
         });
@@ -632,4 +654,23 @@ export function createModalSummary(timeTaken = "0:00", movesUsed = 0) {
     );
 
     return summaryContainer;
+}
+
+export function animateModal(container: Container, duration: number = 1.2) {
+    const initialScale = container.scale.x;
+
+    // Pulse animation
+    gsap.to(container.scale, {
+        duration,
+        x: initialScale * 0.9,
+        y: initialScale * 0.9,
+        ease: "power0.out",
+        yoyo: true,
+        repeat: -1,
+    });
+}
+
+// To stop the animation (e.g., when closing the modal)
+export function stopAnimation(container: Container) {
+    gsap.killTweensOf(container.scale);
 }

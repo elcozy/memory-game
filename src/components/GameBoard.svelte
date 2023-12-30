@@ -10,17 +10,16 @@
         updateToGameStore,
     } from "../store";
     import {
+        animateModal,
         clearTimer,
         createGridz,
         createModalSummary,
-        destroyGameElements,
+        destroyGameBoard,
         resetLastTwoMoves,
         updateGameElementsVisibility,
     } from "../utils";
 
     export let app: Application;
-
-    let gridContainer: Container;
 
     const createGame = () => {
         createGrid(
@@ -33,17 +32,24 @@
         const appHeight = $gameStore.playerNum === EPlayerNum.One ? 733 : 650;
         app?.renderer.resize(appWidth, appHeight);
     };
+
+    const createSummary = () => {
+        const summary = createModalSummary($timeSpent, $gameStore.movesTotal);
+
+        summary.pivot.set(summary.width / 2, summary.height / 2);
+        summary.position.set(
+            summary.width / 2,
+            screen.height / 2 + (app.screen.height - screen.height) / 2
+        );
+
+        animateModal(summary);
+        updateToGameStore("summaryPixi", summary);
+
+        if (app?.stage) app.stage.addChild(summary);
+    };
     onMount(() => {
         createGame();
     });
-
-    async function destroyElements() {
-        await destroyGameElements().then(() => {
-            if (app && gridContainer) {
-                app.stage?.removeChild(gridContainer);
-            }
-        });
-    }
 
     let creatingGrid = false;
     let timeout2Games;
@@ -55,25 +61,15 @@
         if (currElementsFound === gameElementsLen) {
             console.log("GAME FINISHED");
             clearTimer();
-            const summary = createModalSummary(
-                $timeSpent,
-                $gameStore.movesTotal
-            );
-            summary.position.set(0, app.screen.height / 2 - summary.width / 2);
-            updateToGameStore("summaryPixi", summary);
-
-            if (app?.stage) app.stage.addChild(summary);
+            createSummary();
         }
     });
     subscribeGameStore("gameElements", async (currGameElement) => {
         console.log("currGameElement", currGameElement);
 
         if (currGameElement.length === 0 && !creatingGrid) {
-            await destroyElements();
+            await destroyGameBoard();
             console.log("destroyed grid on subscribe");
-            // createGame();
-            // destroyElements();
-            // await destroyElements();
         } else {
         }
     });
@@ -105,7 +101,7 @@
     });
 
     onDestroy(async () => {
-        await destroyElements();
+        await destroyGameBoard();
     });
 
     async function createGrid(
@@ -121,7 +117,6 @@
             iconGrid,
         }).then((res) => {
             console.log("res", res);
-            gridContainer = res;
             if (app?.stage) app.stage.addChild(res);
         });
     }

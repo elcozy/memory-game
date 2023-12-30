@@ -72,7 +72,7 @@
             mainGameBg.y + cardPadding
         );
         memoryIcon = Sprite.from(Assets.get("Memory"));
-
+        memoryIcon.scale.set(1.4);
         memoryIcon.position.set(app.screen.width / 2 - memoryIcon.width / 2, 0);
         const themeContainer = createTheme();
         themeContainer.position.set(0);

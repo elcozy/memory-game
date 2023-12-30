@@ -43,6 +43,7 @@ export type TGameStore = {
     playerNum: EPlayerNum;
     elementsFound: number;
     summaryPixi?: Container;
+    gridContainer?: Container;
 
     moves: any[];
     pairs: any[];

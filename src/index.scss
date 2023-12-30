@@ -11,7 +11,9 @@
     --skyBlue: #6395b8;
     --white: #fcfcfc;
 }
-
+* {
+    box-sizing: border-box;
+}
 body {
     // background: var(--midnightBlue);
     font-family: "Atkinson Hyperlegible", sans-serif;
@@ -34,6 +36,14 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 20px;
+
+    max-width: 100vw;
+    max-height: 100vh;
+
+    overflow: hidden;
+
+    position: relative;
 }
 
 // .app-section {
@@ -54,6 +64,6 @@ body {
         max-width: inherit;
         max-height: inherit;
         height: auto;
-        width: auto;
+        width: inherit;
     }
 }

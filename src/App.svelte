@@ -137,6 +137,7 @@
         flex-direction: column;
         align-items: center;
         gap: 20px;
+        overflow: hidden;
         img {
             width: 20%;
         }
@@ -145,27 +146,30 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
+            flex-wrap: wrap;
+            gap: 20px;
         }
         .btns {
             display: flex;
             gap: 10px;
+            font-size: 16px;
             button {
                 border: 0;
                 font-family: "Atkinson Hyperlegible", sans-serif;
 
                 font-weight: bold;
-                font-size: 20px;
+                font-size: inherit;
                 cursor: pointer;
                 &.restart {
                     background: var(--orange);
                     color: var(--white);
-                    padding: 15px 25px;
+                    padding: 10px 20px;
                     border-radius: 20px;
                 }
                 &.new-game {
                     background: var(--darkGray);
                     color: var(--darkBlue);
-                    padding: 15px 25px;
+                    padding: 10px 20px;
                     border-radius: 20px;
                 }
             }
