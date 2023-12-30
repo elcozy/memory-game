@@ -342,7 +342,7 @@ const createGridz = ({
 
                 circle.position.set(x, y);
 
-                circle.interactive = true;
+                circle.eventMode = "static";
                 circle.cursor = "pointer";
 
                 let circleShape: Sprite | undefined;
@@ -469,7 +469,7 @@ const createBtn = ({
     customBtn.drawRoundedRect(0, 0, width, height, radius);
     customBtn.endFill();
 
-    customBtn.interactive = true;
+    customBtn.eventMode = "static";
     customBtn.cursor = "pointer";
     const setStateBg = (color) => {
         customBtn.clear();

@@ -1,4 +1,4 @@
-import Logger from "./logger";
+import Logger from "./Logger";
 export { animateModal, stopAnimation } from "./AnimationUtils";
 
 export {

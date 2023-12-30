@@ -131,7 +131,7 @@
         );
         themeNumBtn.drawRoundedRect(0, 0, themeBtnW, themeBtnH, themeBtnR);
         themeNumBtn.endFill();
-        themeNumBtn.interactive = true;
+        themeNumBtn.eventMode = "static";
         themeNumBtn.cursor = "pointer";
         themeNumBtn.on("pointerdown", () => {
             Logger.log("selected theme number");
@@ -144,7 +144,7 @@
         );
         themeIconsBtn.drawRoundedRect(0, 0, themeBtnW, themeBtnH, themeBtnR);
         themeIconsBtn.endFill();
-        themeIconsBtn.interactive = true;
+        themeIconsBtn.eventMode = "static";
         themeIconsBtn.cursor = "pointer";
         themeIconsBtn.on("pointerdown", () => {
             Logger.log("New themeIconsBtn");
@@ -275,10 +275,10 @@
             btn.drawRoundedRect(0, 0, numOfPlayersBtnsW, themeBtnH, themeBtnR);
             btn.endFill();
             if (playerNum === 0) {
-                btn.interactive = true;
+                btn.eventMode = "static";
                 btn.cursor = "pointer";
             } else {
-                btn.interactive = true;
+                btn.eventMode = "static";
                 btn.cursor = "not-allowed";
             }
 
@@ -336,7 +336,7 @@
         );
         grid4Btn.drawRoundedRect(0, 0, themeBtnW, themeBtnH, themeBtnR);
         grid4Btn.endFill();
-        grid4Btn.interactive = true;
+        grid4Btn.eventMode = "static";
         grid4Btn.cursor = "pointer";
         grid4Btn.on("pointerdown", () => {
             Logger.log(4);
@@ -349,7 +349,7 @@
         );
         grid6Btn.drawRoundedRect(0, 0, themeBtnW, themeBtnH, themeBtnR);
         grid6Btn.endFill();
-        grid6Btn.interactive = true;
+        grid6Btn.eventMode = "static";
         grid6Btn.cursor = "pointer";
         grid6Btn.on("pointerdown", () => {
             Logger.log(6);
@@ -437,7 +437,7 @@
         startGameBtn.beginFill(0xfda214);
         startGameBtn.drawRoundedRect(0, 0, startBtnW, startBtnH, startBtnR);
         startGameBtn.endFill();
-        startGameBtn.interactive = true;
+        startGameBtn.eventMode = "static";
         startGameBtn.cursor = "pointer";
         startGameBtn.on("pointerdown", () => {
             Logger.log("Start game");

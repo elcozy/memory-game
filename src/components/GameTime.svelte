@@ -89,7 +89,7 @@
         const x = 0;
         const y = app.renderer.height - timeBgHeight;
 
-        timeBg.interactive = true;
+        timeBg.eventMode = "static";
         timeBg.cursor = "pointer";
 
         const timeText = new Text("Time", {
@@ -127,7 +127,7 @@
         const x = app.renderer.width - timeBgWidth;
         const y = app.renderer.height - timeBgHeight;
 
-        movesBg.interactive = true;
+        movesBg.eventMode = "static";
         movesBg.cursor = "pointer";
 
         const movesTextPixi = new Text("Moves", {
