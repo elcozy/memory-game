@@ -2,17 +2,16 @@
     import { Application, Assets } from "pixi.js";
     import { afterUpdate, onDestroy, onMount } from "svelte";
     import { gameStore, subscribeGameStore } from "./store";
-    import { fontList, manifest } from "./manifest";
+    import { manifest } from "./manifest";
     import GameTime from "./components/GameTime.svelte";
-    // import Header from "./components/Header.svelte";
     import MainScreen from "./components/MainScreen.svelte";
     import "./index.scss";
-    import memoryIcon from "./assets/memory.svg";
     import memoryDarkIcon from "./assets/memoryDark.svg";
     import GameBoard from "./components/GameBoard.svelte";
-    import { onNewGameClick, onRestartClick, setApp } from "./utils";
+    import { onNewGameClick, onRestartClick, setApp } from "./utils/index";
     import { EPlayerNum } from "./types";
     import { initStore } from "./constants";
+    import { fontList } from "./assets/fontList";
     let pixiContainer;
 
     let app: Application;
@@ -117,13 +116,9 @@
         {#if appLoaded}
             {#if $gameStore.screen === "game"}
                 <GameBoard {app} />
-                <!-- <Header {app} /> -->
-                <!-- <GameMoves {app} /> -->
                 <GameTime {app} />
             {/if}
             {#if $gameStore.screen === "main"}
-                <!-- <Bunny {app} /> -->
-
                 <MainScreen {app} />
             {/if}
         {/if}

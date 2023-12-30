@@ -1,19 +1,18 @@
 import { get } from "svelte/store";
 import {
     gameStore,
-    timeElapsed,
     timeSpent,
     updateGameStore,
     updateToGameStore,
-} from "./store";
-import { EPlayerNum, GameSize, GameType } from "./types";
+} from "../store";
+import { EPlayerNum, GameSize, GameType } from "../types";
 
 import {
     createGameRandomItems,
     initStore,
     setDimensions,
     shuffleArray,
-} from "./constants";
+} from "../constants";
 import {
     Application,
     Assets,
@@ -22,21 +21,21 @@ import {
     Sprite,
     Text,
 } from "pixi.js";
-import type { CreateGridOptions, GameElement } from "./types";
-import { svgIconsArr } from "./manifest";
-import gsap, { Power0 } from "gsap";
+import type { CreateGridOptions, GameElement } from "../types";
+import { svgIconsArr } from "../manifest";
+import { stopAnimation } from "./AnimationUtils";
 
-export const setGameFinished = () => {
+const setGameFinished = () => {
     updateGameStore((state) => {
         state.isGameFinished = true;
         return state;
     });
 };
-export const resetLastTwoMoves = (activePlayerIndex) => {
+const resetLastTwoMoves = (activePlayerIndex) => {
     updateToGameStore("lastTwoMoves", []);
 };
 
-export const handleClickGameElement = (i, j) => {
+const handleClickGameElement = (i, j) => {
     const gameStr = get(gameStore);
     console.log("handleClickGameElement", i, j, gameStr.lastTwoMoves);
     if (gameStr.lastTwoMoves.length >= 2) return;
@@ -56,7 +55,7 @@ export const handleClickGameElement = (i, j) => {
     }
 };
 
-export const disableElementsActiveState = (unActiveGameArr) => {
+const disableElementsActiveState = (unActiveGameArr) => {
     updateGameStore((state) => {
         unActiveGameArr.forEach((elementToHide) => {
             const currElementHide =
@@ -73,7 +72,7 @@ export const disableElementsActiveState = (unActiveGameArr) => {
 let app: Application;
 let interval: NodeJS.Timeout;
 
-export const startTimer = () => {
+const startTimer = () => {
     interval = setInterval(() => {
         timeSpent.secUpdate((prev) => {
             const newSec = prev + 1;
@@ -92,20 +91,20 @@ export const startTimer = () => {
     }, 1000);
     // interval =
 };
-export const clearTimer = () => {
+const clearTimer = () => {
     if (interval) {
         clearInterval(interval);
     }
 };
-export const pauseTimer = () => {
+const pauseTimer = () => {
     clearTimer();
 };
 
-export const setApp = (gameApp: Application) => {
+const setApp = (gameApp: Application) => {
     app = gameApp;
 };
 
-export const onNewGameClick = async () => {
+const onNewGameClick = async () => {
     console.log("New Game");
 
     if (app) {
@@ -128,7 +127,7 @@ export const onNewGameClick = async () => {
     updateToGameStore("elementsFound", 0);
     updateToGameStore("movesTotal", 0);
 };
-export const onRestartClick = async () => {
+const onRestartClick = async () => {
     console.log(app);
     if (app) {
         if (get(gameStore).summaryPixi) {
@@ -176,7 +175,7 @@ export const onRestartClick = async () => {
     updateToGameStore("elementsFound", 0);
 };
 
-export const updateGameElementsVisibility = (
+const updateGameElementsVisibility = (
     updateGameArr = [],
     isVisible = false
 ) => {
@@ -233,7 +232,7 @@ export const updateGameElementsVisibility = (
         // });
     });
 };
-export const destroyGameElements = () => {
+const destroyGameElements = () => {
     console.log("start destroying");
 
     return new Promise<void>((resolve) => {
@@ -262,7 +261,7 @@ export const destroyGameElements = () => {
         });
     });
 };
-export const destroyGameBoard = () => {
+const destroyGameBoard = () => {
     console.log("start destroying board");
 
     return new Promise<void>((resolve) => {
@@ -280,7 +279,7 @@ export const destroyGameBoard = () => {
     });
 };
 
-export const createGridz = ({
+const createGridz = ({
     appWidth,
     appHeight,
     rows,
@@ -324,9 +323,6 @@ export const createGridz = ({
         gridContainer.position.set(appWidth / 2 - gameBoardBg.width / 2, 0);
 
         let currentCircle = 0;
-        console.log(
-            `Current Circle: ${currentCircle}, Icons: ${icons}, Game Elements: ${gameElements}`
-        );
 
         gridContainer.addChild(gameBoardBg);
 
@@ -452,7 +448,7 @@ export const createGridz = ({
     });
 };
 
-export const createBtn = ({
+const createBtn = ({
     width,
     height,
     radius = 0,
@@ -496,7 +492,7 @@ export const createBtn = ({
 
     return customBtn;
 };
-export const createGraphics = ({
+const createGraphics = ({
     width,
     height,
     radius = 0,
@@ -516,7 +512,7 @@ export const createGraphics = ({
     return customBtn;
 };
 
-export function createModalSummary(timeTaken = "0:00", movesUsed = 0) {
+function createModalSummary(timeTaken = "0:00", movesUsed = 0) {
     const summaryContainer = new Container();
     const defSty = {
         fontFamily: "AtkinsonHyperlegible Bold",
@@ -656,21 +652,22 @@ export function createModalSummary(timeTaken = "0:00", movesUsed = 0) {
     return summaryContainer;
 }
 
-export function animateModal(container: Container, duration: number = 1.2) {
-    const initialScale = container.scale.x;
-
-    // Pulse animation
-    gsap.to(container.scale, {
-        duration,
-        x: initialScale * 0.9,
-        y: initialScale * 0.9,
-        ease: "power0.out",
-        yoyo: true,
-        repeat: -1,
-    });
-}
-
-// To stop the animation (e.g., when closing the modal)
-export function stopAnimation(container: Container) {
-    gsap.killTweensOf(container.scale);
-}
+export {
+    setGameFinished,
+    resetLastTwoMoves,
+    handleClickGameElement,
+    disableElementsActiveState,
+    startTimer,
+    clearTimer,
+    pauseTimer,
+    setApp,
+    onNewGameClick,
+    onRestartClick,
+    updateGameElementsVisibility,
+    destroyGameElements,
+    destroyGameBoard,
+    createGridz,
+    createBtn,
+    createGraphics,
+    createModalSummary,
+};

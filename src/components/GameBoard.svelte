@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Application, Container, Graphics, Text } from "pixi.js";
+    import { Application } from "pixi.js";
     import { onDestroy, onMount } from "svelte";
 
     import { EPlayerNum, GameSize, GameType } from "../types";
@@ -10,14 +10,14 @@
         updateToGameStore,
     } from "../store";
     import {
-        animateModal,
         clearTimer,
         createGridz,
         createModalSummary,
         destroyGameBoard,
         resetLastTwoMoves,
         updateGameElementsVisibility,
-    } from "../utils";
+        animateModal,
+    } from "../utils/index";
 
     export let app: Application;
 
